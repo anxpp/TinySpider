@@ -1,7 +1,7 @@
 package com.anxpp.soft.tinyspider.simple.mcnbeta.core;
 
 import com.anxpp.soft.tinyspider.Utils.ArticleSpider;
-import com.anxpp.soft.tinyspider.Utils.analyzer.impl.CsdnWeeklyDocumentAnalyzer;
+import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Value("${csdn.weekly.preurl}")
     private String preUrl;
     @Resource
-    private CsdnWeeklyDocumentAnalyzer csdnWeeklyDocumentAnalyzer;
+    private DocumentAnalyzer mcnbetaDocumentAnalyzer;
 
     /**
      * 根据期号获取文章列表
@@ -29,7 +29,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Cacheable(value = "reportcache", keyGenerator = "csdnKeyGenerator")
     public List<ArticleEntity> forWeekly(Integer stage) throws Exception {
-        List<ArticleEntity> articleEntityList = ArticleSpider.forEntityList(preUrl + stage, csdnWeeklyDocumentAnalyzer, ArticleEntity.class);
+        List<ArticleEntity> articleEntityList = ArticleSpider.forEntityList(preUrl + stage, mcnbetaDocumentAnalyzer, ArticleEntity.class);
         articleEntityList.forEach(article -> article.setStage(stage));
         return articleEntityList;
     }

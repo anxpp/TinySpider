@@ -1,7 +1,7 @@
 package com.anxpp.soft.tinyspider.simple.csdnweekly.core;
 
 import com.anxpp.soft.tinyspider.Utils.ArticleSpider;
-import com.anxpp.soft.tinyspider.Utils.analyzer.impl.CsdnWeeklyDocumentAnalyzer;
+import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Value("${csdn.weekly.preurl}")
     private String preUrl;
     @Resource
-    private CsdnWeeklyDocumentAnalyzer csdnWeeklyDocumentAnalyzer;
+    private DocumentAnalyzer csdnWeeklyDocumentAnalyzer;
 
     /**
      * 根据期号获取文章列表

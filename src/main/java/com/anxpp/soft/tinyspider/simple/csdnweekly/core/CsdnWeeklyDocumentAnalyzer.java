@@ -1,4 +1,4 @@
-package com.anxpp.soft.tinyspider.Utils.analyzer.impl;
+package com.anxpp.soft.tinyspider.simple.csdnweekly.core;
 
 import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.jsoup.nodes.Document;

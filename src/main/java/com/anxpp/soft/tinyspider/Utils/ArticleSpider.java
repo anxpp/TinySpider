@@ -1,6 +1,6 @@
 package com.anxpp.soft.tinyspider.Utils;
 
-import com.anxpp.soft.tinyspider.Utils.analyzer.impl.CsdnWeeklyDocumentAnalyzer;
+import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ public class ArticleSpider {
 
     private static final Logger log = LoggerFactory.getLogger(ArticleSpider.class);
 
-    public static <T> List<T> forEntityList(String url, CsdnWeeklyDocumentAnalyzer docAnalyzer, Class<T> type) throws Exception {
+    public static <T> List<T> forEntityList(String url, DocumentAnalyzer docAnalyzer, Class<T> type) throws Exception {
 
         log.info("开始抓取文章："+url);
 
