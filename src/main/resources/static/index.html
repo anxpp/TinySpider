@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="anxpp.com旗下网站"/>
+    <meta name="keywords" content="anxpp, 暗香飘飘, Tiny Software Studio, 免费建站"/>
+    <meta name="author" content="anxpp"/>
+    <title>CSDN每周干货分享</title>
+    <!-- Bootstrap Core CSS -->
+    <link href="http://qiniu.anxpp.com/anxpp/index/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Custom CSS -->
+    <link href="http://qiniu.anxpp.com/anxpp/index/css/landing-page.css" rel="stylesheet"/>
+    <link href="css/showLoading.css" rel="stylesheet"/>
+    <style>
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track-piece {
+            background-color: #E0E0E0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border: 0;
+        }
+
+        ::-webkit-scrollbar-thumb:vertical:hover, ::-webkit-scrollbar-thumb:horizontal:hover {
+            background-color: #aaa;
+        }
+
+        ::-webkit-scrollbar-thumb:vertical {
+            height: 5px;
+            background-color: #bbb;
+        }
+
+        ::-webkit-scrollbar-thumb:horizontal {
+            width: 5px;
+            background-color: #bbb;
+        }
+
+        .simple-span {
+            color: #888;
+            font-size: 9px;
+            font-weight: 200;
+            display: inline-block;
+            margin-right: 35px;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
+    <div class="container topnav">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span
+                    class="icon-bar"></span> <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand topnav" href="http://anxpp.com">Tiny Software Studio</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="https://github.com/anxpp/csdnweeklySpider">本页全部源代码：GitHub</a></li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<!-- Header -->
+<a name="home"></a>
+<div class="intro-header" style="position: relative;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="intro-message">
+                    <h1>CSDN每周干货</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</div>
+<!-- /.intro-header -->
+<!-- Page Content -->
+<a name="site"></a>
+<div class="content-section-b">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1"
+                 style="height: 500px">
+                <div class="row" style="height: 500px">
+                    <div class="spinner">
+                        <div class="bounce1"></div>
+                        <div class="bounce2"></div>
+                        <div class="bounce3"></div>
+                    </div>
+                    <div class="list-group col-xs-2 col-sm-2 col-md-2 col-lg-2" id="menu"
+                         style="overflow: auto;height: 500px;overflow-x: hidden;margin: 0;padding: 0; ">
+                    </div>
+                    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" id="content"
+                         style="overflow: auto;height: 500px;overflow-x: hidden;margin: 0;padding-left: 30px; ">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</div>
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <p class="copyright text-muted small">Copyright &copy; Tiny Software Studio 2016. All Rights Reserved
+                    渝ICP备15010564号</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="http://qiniu.anxpp.com/anxpp/index/js/jquery.js"></script>
+<!-- Bootstrap Core JavaScript -->
+<script src="http://qiniu.anxpp.com/anxpp/index/js/bootstrap.min.js"></script>
+<script src="js/jquery.showLoading.js"></script>
+<script>
+    $(function () {
+        $('#menu').children().slideUp();
+        for (var i = 1; i <= 51; i++) {
+            $('#menu').append('<button onclick="getArticles(this,' + i + ')" style="display: none;width:100%;text-align: center" type="button" class="list-group-item">第' + i + '周</button>');
+        }
+        $('#menu').children().slideDown();
+        $('#menu button').eq(1).click();
+
+        $('.ball, .ball1').removeClass('stop');
+        $('.trigger').click(function () {
+            $('.ball, .ball1').toggleClass('stop');
+        });
+    });
+    function getArticles(e, i) {
+        $('#content').slideUp();
+        $('#content').showLoading();
+        jQuery.ajax({
+            url: '/article/get/stage/' + i,
+            type: "get",
+            data: {id: '0'},
+            dataType: "json",
+            success: function (articles) {
+                $('#content').empty();
+                var contents = new Array();
+                for (var i in articles) {
+                    contents.push('<div class="row">');
+                    contents.push(' <a href="' + articles[i].type + '"><img style="padding: 10px; height: 100px; width: auto; overflow: hidden;" src="' + articles[i].img + '" class="col-xs-3 col-sm-3 col-md-3 col-lg-3"/></a>');
+                    contents.push(' <div style="height: 100px;" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">');
+                    contents.push('     <div style="height: 50px; line-height: 50px;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a href="' + articles[i].url + '">' + articles[i].name + '</a></div>');
+                    contents.push('     <div style="height: 50px; line-height: 50px;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 simple-span">点赞数量 ' + articles[i].views + '--收藏数量' + articles[i].collections + '</div>');
+                    contents.push(' </div>');
+                    contents.push(' <div style="height: 2px; background: #eee;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></div>');
+                    contents.push('</div>');
+                }
+                $('#content').append(contents.join(''));
+                $('#content').slideDown();
+                $('#content').hideLoading();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                $('#content').append('<h1>获取失败</h1>');
+                $('#content').hideLoading();
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+            }
+        });
+    }
+</script>
+</body>
+</html>
