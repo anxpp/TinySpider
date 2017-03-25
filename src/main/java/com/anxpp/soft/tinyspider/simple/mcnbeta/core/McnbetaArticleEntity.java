@@ -1,4 +1,4 @@
-package com.anxpp.soft.tinyspider.simple.csdnweekly.core;
+package com.anxpp.soft.tinyspider.simple.mcnbeta.core;
 
 import com.anxpp.soft.tinyspider.config.base.BaseEntity;
 
@@ -10,15 +10,15 @@ import java.util.Date;
  * Created by anxpp.com on 2017/3/11.
  */
 @Entity
-@Table(name = "t_csdn_weekly_article")
-public class ArticleEntity extends BaseEntity {
+@Table(name = "t_mcnbeta_article")
+public class McnbetaArticleEntity extends BaseEntity {
     /**
      * 文章名称
      */
     private String name;
 
     /**
-     * 文章名称
+     * 文章链接
      */
     private String url;
 
@@ -54,7 +54,7 @@ public class ArticleEntity extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateAt;
 
-    public ArticleEntity() {
+    public McnbetaArticleEntity() {
         this.updateAt = new Date();
     }
 

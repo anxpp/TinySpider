@@ -1,0 +1,44 @@
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track-piece {
+    background-color: #E0E0E0;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 0;
+}
+
+::-webkit-scrollbar-thumb:vertical:hover, ::-webkit-scrollbar-thumb:horizontal:hover {
+    background-color: #aaa;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+    height: 5px;
+    background-color: #bbb;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+    width: 5px;
+    background-color: #bbb;
+}
+
+.simple-span {
+    color: #888;
+    font-size: 9px;
+    font-weight: 200;
+    display: inline-block;
+    margin-right: 35px;
+}

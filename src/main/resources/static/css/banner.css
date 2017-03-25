@@ -1,0 +1,9 @@
+canvas {
+    background: white;
+    display: block;
+}
+
+#c {
+    height: 500px;
+    transform: translate(-50%, -50%);
+}

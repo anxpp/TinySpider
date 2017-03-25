@@ -1,4 +1,4 @@
-package com.anxpp.soft.tinyspider.simple.mcnbeta.core;
+package com.anxpp.soft.tinyspider.simple.csdnweekly.core;
 
 import com.anxpp.soft.tinyspider.Utils.ArticleSpider;
 import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
@@ -14,11 +14,11 @@ import java.util.List;
  * Created by anxpp.com on 2017/3/11.
  */
 @Service
-public class ArticleServiceImpl implements ArticleService {
-    @Value("${csdn.weekly.preurl}")
+public class CsdnWeeklyArticleServiceImpl implements CsdnWeeklyArticleService {
+    @Value("${url.csdnweekly.preurl}")
     private String preUrl;
     @Resource
-    private DocumentAnalyzer mcnbetaDocumentAnalyzer;
+    private DocumentAnalyzer csdnWeeklyDocumentAnalyzer;
 
     /**
      * 根据期号获取文章列表
@@ -28,8 +28,8 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     @Cacheable(value = "reportcache", keyGenerator = "csdnKeyGenerator")
-    public List<ArticleEntity> forWeekly(Integer stage) throws Exception {
-        List<ArticleEntity> articleEntityList = ArticleSpider.forEntityList(preUrl + stage, mcnbetaDocumentAnalyzer, ArticleEntity.class);
+    public List<CsdnWeeklyArticleEntity> forWeekly(Integer stage) throws Exception {
+        List<CsdnWeeklyArticleEntity> articleEntityList = ArticleSpider.forEntityList(preUrl + stage, csdnWeeklyDocumentAnalyzer, CsdnWeeklyArticleEntity.class);
         articleEntityList.forEach(article -> article.setStage(stage));
         return articleEntityList;
     }

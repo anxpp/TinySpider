@@ -1,4 +1,4 @@
-package com.anxpp.soft.tinyspider.simple.mcnbeta.core;
+package com.anxpp.soft.tinyspider.simple.csdnweekly.core;
 
 import com.anxpp.soft.tinyspider.config.base.BaseEntity;
 
@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "t_csdn_weekly_article")
-public class ArticleEntity extends BaseEntity {
+public class CsdnWeeklyArticleEntity extends BaseEntity {
     /**
      * 文章名称
      */
@@ -54,7 +54,7 @@ public class ArticleEntity extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateAt;
 
-    public ArticleEntity() {
+    public CsdnWeeklyArticleEntity() {
         this.updateAt = new Date();
     }
 

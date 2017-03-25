@@ -7,48 +7,13 @@
     <meta name="description" content="anxpp.com旗下网站"/>
     <meta name="keywords" content="anxpp, 暗香飘飘, Tiny Software Studio, 免费建站"/>
     <meta name="author" content="anxpp"/>
-    <title>CSDN每周干货分享</title>
+    <title>Tiny Spider</title>
     <!-- Bootstrap Core CSS -->
     <link href="http://qiniu.anxpp.com/anxpp/index/css/bootstrap.min.css" rel="stylesheet"/>
     <!-- Custom CSS -->
     <link href="http://qiniu.anxpp.com/anxpp/index/css/landing-page.css" rel="stylesheet"/>
     <link href="css/showLoading.css" rel="stylesheet"/>
-    <style>
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track-piece {
-            background-color: #E0E0E0;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            border: 0;
-        }
-
-        ::-webkit-scrollbar-thumb:vertical:hover, ::-webkit-scrollbar-thumb:horizontal:hover {
-            background-color: #aaa;
-        }
-
-        ::-webkit-scrollbar-thumb:vertical {
-            height: 5px;
-            background-color: #bbb;
-        }
-
-        ::-webkit-scrollbar-thumb:horizontal {
-            width: 5px;
-            background-color: #bbb;
-        }
-
-        .simple-span {
-            color: #888;
-            font-size: 9px;
-            font-weight: 200;
-            display: inline-block;
-            margin-right: 35px;
-        }
-    </style>
+    <link href="css/index.css" rel="stylesheet"/>
 </head>
 <body>
 <!-- Navigation -->
@@ -73,14 +38,16 @@
     </div>
     <!-- /.container -->
 </nav>
+
 <!-- Header -->
-<a name="home"></a>
-<div class="intro-header" style="position: relative;">
+<div class="header">
     <div class="container">
         <div class="row">
-            <div class="col-lg-12">
+            <canvas id="canvas_test" style="display: none;"></canvas>
+            <iframe src="color/index.html" class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1" style="padding: 0;height: 300px; border: none;"></iframe>
+            <div style="display: none;" id="div_header_main"  class="col-lg-12">
                 <div class="intro-message">
-                    <h1>CSDN每周干货</h1>
+                    <h1>Tiny Spider</h1>
                 </div>
             </div>
         </div>
@@ -89,23 +56,36 @@
 </div>
 <!-- /.intro-header -->
 <!-- Page Content -->
-<a name="site"></a>
 <div class="content-section-b">
     <div class="container">
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1"
-                 style="height: 500px">
-                <div class="row" style="height: 500px">
-                    <div class="spinner">
-                        <div class="bounce1"></div>
-                        <div class="bounce2"></div>
-                        <div class="bounce3"></div>
+            <div class="col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1">
+                <div class="row" style="height: 100%">
+                    <ul id="ul_tab_menu" class="nav nav-tabs nav-justified" style="overflow: auto;height: 100%;overflow-x: hidden;margin: 0;padding: 0; ">
+                        <li role="presentation" for="#div_main_content_csdnweekly"><a href="javascript:void(0);">CSDN每周干货</a></li>
+                        <li role="presentation" for="#div_main_content_mbeta"><a href="javascript:void(0);">Cnbeta即时热文</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="row" style="height: 600px">
+                    <div id="div_main_content_csdnweekly" class="main_content col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1" style="height: 100%;">
+                        <div class="row">
+                            <div class="list-group col-xs-2 col-sm-2 col-md-2 col-lg-2" id="menu_csdnweekly" style="max-height: 600px;overflow: auto;overflow-x: hidden;margin: 0;padding: 0; "></div>
+                            <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" id="content_csdnweekly" style="max-height: 600px;overflow: auto;overflow-x: hidden;margin: 0;padding-left: 30px; "></div>
+                        </div>
                     </div>
-                    <div class="list-group col-xs-2 col-sm-2 col-md-2 col-lg-2" id="menu"
-                         style="overflow: auto;height: 500px;overflow-x: hidden;margin: 0;padding: 0; ">
-                    </div>
-                    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10" id="content"
-                         style="overflow: auto;height: 500px;overflow-x: hidden;margin: 0;padding-left: 30px; ">
+                    <div id="div_main_content_mbeta" class="main_content col-xs-12 col-sm-12 col-md-10 col-md-offset-1 col-lg-10 col-lg-offset-1" style="height: 100%; display: none">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-md-offset-2 col-lg-12 col-lg-offset-2" id="content_mcnbeta" style="max-height: 568px;overflow: auto;overflow-x: hidden;margin: 0;padding: 0 10%; "></div>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <nav aria-label="..." style=" height: 32px;">
+                                    <ul class="pager">
+                                        <li><a id="a_mcnbeta_next" href="javascript:void(0);" onclick="getMcnbetaArticles()">下一页</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +94,7 @@
     <!-- /.container -->
 </div>
 <!-- Footer -->
-<footer>
+<footer class="footer">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -126,57 +106,10 @@
 </footer>
 
 <!-- jQuery -->
-<script src="http://qiniu.anxpp.com/anxpp/index/js/jquery.js"></script>
+<script src="http://lib.sinaapp.com/js/jquery/1.12.4/jquery-1.12.4.min.js"></script>
 <!-- Bootstrap Core JavaScript -->
 <script src="http://qiniu.anxpp.com/anxpp/index/js/bootstrap.min.js"></script>
 <script src="js/jquery.showLoading.js"></script>
-<script>
-    $(function () {
-        $('#menu').children().slideUp();
-        for (var i = 1; i <= 51; i++) {
-            $('#menu').append('<button onclick="getArticles(this,' + i + ')" style="display: none;width:100%;text-align: center" type="button" class="list-group-item">第' + i + '周</button>');
-        }
-        $('#menu').children().slideDown();
-        $('#menu button').eq(1).click();
-
-        $('.ball, .ball1').removeClass('stop');
-        $('.trigger').click(function () {
-            $('.ball, .ball1').toggleClass('stop');
-        });
-    });
-    function getArticles(e, i) {
-        $('#content').slideUp();
-        $('#content').showLoading();
-        jQuery.ajax({
-            url: '/article/get/stage/' + i,
-            type: "get",
-            data: {id: '0'},
-            dataType: "json",
-            success: function (articles) {
-                $('#content').empty();
-                var contents = new Array();
-                for (var i in articles) {
-                    contents.push('<div class="row">');
-                    contents.push(' <a href="' + articles[i].type + '"><img style="padding: 10px; height: 100px; width: auto; overflow: hidden;" src="' + articles[i].img + '" class="col-xs-3 col-sm-3 col-md-3 col-lg-3"/></a>');
-                    contents.push(' <div style="height: 100px;" class="col-xs-9 col-sm-9 col-md-9 col-lg-9">');
-                    contents.push('     <div style="height: 50px; line-height: 50px;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a href="' + articles[i].url + '">' + articles[i].name + '</a></div>');
-                    contents.push('     <div style="height: 50px; line-height: 50px;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 simple-span">点赞数量 ' + articles[i].views + '--收藏数量' + articles[i].collections + '</div>');
-                    contents.push(' </div>');
-                    contents.push(' <div style="height: 2px; background: #eee;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></div>');
-                    contents.push('</div>');
-                }
-                $('#content').append(contents.join(''));
-                $('#content').slideDown();
-                $('#content').hideLoading();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                $('#content').append('<h1>获取失败</h1>');
-                $('#content').hideLoading();
-            },
-            complete: function (XMLHttpRequest, textStatus) {
-            }
-        });
-    }
-</script>
+<script src="js/index.js"></script>
 </body>
 </html>
