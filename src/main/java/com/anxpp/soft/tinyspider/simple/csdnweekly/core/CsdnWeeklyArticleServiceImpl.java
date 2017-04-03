@@ -19,6 +19,8 @@ public class CsdnWeeklyArticleServiceImpl implements CsdnWeeklyArticleService {
     private String preUrl;
     @Resource
     private DocumentAnalyzer csdnWeeklyDocumentAnalyzer;
+    @Resource
+    CsdnWeeklyArticleRepo csdnWeeklyArticleRepo;
 
     /**
      * 根据期号获取文章列表
@@ -27,10 +29,11 @@ public class CsdnWeeklyArticleServiceImpl implements CsdnWeeklyArticleService {
      * @return 文章列表
      */
     @Override
-    @Cacheable(value = "reportcache", keyGenerator = "csdnKeyGenerator")
+    @Cacheable(value = "csdnweekly", keyGenerator = "keyGenerator")
     public List<CsdnWeeklyArticleEntity> forWeekly(Integer stage) throws Exception {
         List<CsdnWeeklyArticleEntity> articleEntityList = ArticleSpider.forEntityList(preUrl + stage, csdnWeeklyDocumentAnalyzer, CsdnWeeklyArticleEntity.class);
         articleEntityList.forEach(article -> article.setStage(stage));
+        csdnWeeklyArticleRepo.save(articleEntityList);
         return articleEntityList;
     }
 }

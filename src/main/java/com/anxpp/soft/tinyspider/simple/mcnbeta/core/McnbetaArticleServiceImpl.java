@@ -27,7 +27,7 @@ public class McnbetaArticleServiceImpl implements McnbetaArticleService {
      * @return 文章列表
      */
     @Override
-    @Cacheable(value = "mcnbeta", keyGenerator = "csdnKeyGenerator")
+    @Cacheable(value = "mcnbeta", keyGenerator = "keyGenerator")
     public String forPage(Integer page) throws Exception {
         Map<String,Integer> params = new HashMap<>(3);
         params.put("page",page);
