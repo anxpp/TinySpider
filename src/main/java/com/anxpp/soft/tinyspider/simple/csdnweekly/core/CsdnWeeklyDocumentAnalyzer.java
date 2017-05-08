@@ -23,7 +23,7 @@ public class CsdnWeeklyDocumentAnalyzer implements DocumentAnalyzer {
      * @return 结果
      */
     @Override
-    public List<Map<String, Object>> forListMap(Document document) {
+    public List<Map<String, Object>> forListMap(Document document, Object info) {
         List<Map<String, Object>> results = new ArrayList<>();
         if (ObjectUtils.isEmpty(document))
             return results;

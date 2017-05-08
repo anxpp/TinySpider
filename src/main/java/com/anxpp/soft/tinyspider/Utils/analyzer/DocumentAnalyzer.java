@@ -16,5 +16,9 @@ public interface DocumentAnalyzer {
      * @param document html文档对象
      * @return 结果
      */
-    List<Map<String, Object>> forListMap(Document document);
+    default List<Map<String, Object>> forListMap(Document document) {
+        return forListMap(document, null);
+    }
+
+    List<Map<String, Object>> forListMap(Document document, Object info);
 }

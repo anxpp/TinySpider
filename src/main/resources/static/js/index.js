@@ -24,6 +24,7 @@ $(function () {
     }
     initCsdnweekly();
     getMcnbetaArticles();
+    getMovies();
     //TAB点击事件
     $('#ul_tab_menu li').click(function () {
         if ($(this).hasClass('active'))
@@ -63,7 +64,7 @@ function getCsdnweeklyArticles(e, i) {
         dataType: "json",
         success: function (articles) {
             $('#content_csdnweekly').empty();
-            var contents = new Array();
+            var contents = [];
             for (var i in articles) {
                 contents.push('<div class="row">');
                 contents.push('<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="padding:2%;">');
@@ -105,7 +106,7 @@ function getMcnbetaArticles() {
         dataType: "json",
         success: function (result) {
             var articles= result.result.list;
-            var contents = new Array();
+            var contents = [];
             for (var i in articles) {
                 contents.push('<div class="row">');
                 contents.push('<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="padding:2%;">');
@@ -131,5 +132,53 @@ function getMcnbetaArticles() {
             $('#content_mcnbeta').hideLoading();
             $('#a_mcnbeta_next').fadeIn();
         }
+    });
+}
+/**
+ * 获取豆瓣影评
+ * @param e
+ * @param i
+ */
+function getMovies() {
+    $('#content_search_result').showLoading();
+    $.ajax({
+        url: '/douban/movie/search/'+$('#input_movie_name').val(),
+        type: "get",
+        dataType: "json",
+        success: function (result) {
+            var movies= result;
+            var contents = [];
+            for (var i in movies) {
+                contents.push('<div class="row">');
+                contents.push('<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="padding:2%;">');
+                contents.push('     <a target="_blank" href="'+ movies[i].id + '"><img style="width: 100%;max-width: 60px; height: auto; overflow: hidden;" src="' + movies[i].img + '" /></a>');
+                contents.push('</div>');
+                contents.push(' <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">');
+                contents.push('     <div class="row">');
+                contents.push('         <div style="padding: 2% 0" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a target="_blank" href="'+ movies[i].id + '">' + movies[i].name + '</a></div>');
+                contents.push('         <div style="padding: 2% 0" class="simple-span" style="width: 160px;">评分：' + movies[i].rating + ' -- 评论数：' + movies[i].comments + '</div>');
+                contents.push('         <button type="button" onclick="getMovieComments(\''+movies[i].id+'\')" class="btn btn-default">抓取有效影评</button>');
+                contents.push('     </div>');
+                contents.push(' </div>');
+                contents.push(' <div style="height: 2px; background: #eee;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></div>');
+                contents.push('</div>');
+            }
+            $('#content_search_result').append(contents.join(''));
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $('#content_search_result').append('<h1>获取失败</h1>');
+        },
+        complete: function (XMLHttpRequest, textStatus) {
+            $('#content_search_result').hideLoading();
+        }
+    });
+}
+/**
+ * 提交影评抓取任务
+ * @param url 地址
+ */
+function getMovieComments(url){
+    $.get('/douban/movie/comments/'+url.split('/')[4],function () {
+        alert('任务提交成功！再次点击获取任务进度');
     });
 }

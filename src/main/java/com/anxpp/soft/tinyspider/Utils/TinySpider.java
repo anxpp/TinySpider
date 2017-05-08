@@ -17,15 +17,21 @@ public class TinySpider {
     private static final Logger log = LoggerFactory.getLogger(TinySpider.class);
 
     public static <T> List<T> forEntityList(String url, DocumentAnalyzer docAnalyzer, Class<T> type) throws Exception {
+        return forEntityList(url, docAnalyzer, type, null);
+    }
 
-        log.info("开始抓取文章："+url);
+    public static <T> List<T> forEntityList(String url, DocumentAnalyzer docAnalyzer, Class<T> type, Object info) throws Exception {
+
+        log.info("开始抓取文章：" + url);
 
         List<T> results = new ArrayList<>();
-        docAnalyzer.forListMap(Jsoup.connect(url).timeout(50000).get()).forEach(map->{
+        docAnalyzer.forListMap(Jsoup.connect(url).timeout(50000).get(), info).forEach(map -> {
             try {
                 results.add(TinyUtil.mapToBean(map, type));
-            } catch (Exception ignored) {}
-         });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         return results;
     }
 }
