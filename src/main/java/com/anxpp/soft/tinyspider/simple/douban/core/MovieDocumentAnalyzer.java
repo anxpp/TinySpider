@@ -30,8 +30,8 @@ public class MovieDocumentAnalyzer implements DocumentAnalyzer {
             return results;
         document.body().getElementsByClass("ul").forEach(ele -> {
             Map<String, Object> result = new HashMap<>();
-            Element tr = ele.nextElementSibling().child(0);
-            Element a = tr.children().get(0).getElementsByTag("a").first();
+            Element tr = ele.nextElementSibling().child(0).child(0);
+            Element a = tr.child(1).getElementsByTag("a").first();
             result.put("name", a.attr("title"));
             result.put("id", a.attr("href"));
             Element div = ele.nextElementSibling().child(1).getElementsByClass("star").get(0);
