@@ -1,7 +1,9 @@
 package com.anxpp.soft.tinyspider.simple.csdnweekly.controller;
 
-import com.anxpp.soft.tinyspider.simple.csdnweekly.core.ArticleEntity;
-import com.anxpp.soft.tinyspider.simple.csdnweekly.core.ArticleService;
+import com.anxpp.soft.tinyspider.simple.csdnweekly.core.CsdnWeeklyArticleEntity;
+import com.anxpp.soft.tinyspider.simple.csdnweekly.core.CsdnWeeklyArticleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,15 +17,19 @@ import java.util.List;
  * 默认页面
  * Created by anxpp.com on 2017/3/11.
  */
-@Controller
+@Controller("csdnArticleController")
 @RequestMapping("/csdnweekly/article")
-public class ArticleController {
+public class CSDNArticleController {
+
+    private Logger log = LoggerFactory.getLogger(CSDNArticleController.class);
+
     @Resource
-    private ArticleService articleService;
+    private CsdnWeeklyArticleService articleService;
 
     @ResponseBody
     @GetMapping("/get/stage/{stage}")
-    public List<ArticleEntity> getArticleByStage(@PathVariable("stage") Integer stage) throws Exception {
+    public List<CsdnWeeklyArticleEntity> getArticleByStage(@PathVariable("stage") Integer stage) throws Exception {
+        log.info("抓取CSDN每周干货");
         return articleService.forWeekly(stage);
     }
 }

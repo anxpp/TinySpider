@@ -1,6 +1,6 @@
 package com.anxpp.soft.tinyspider.simple.csdnweekly.controller;
 
-import com.anxpp.soft.tinyspider.simple.csdnweekly.core.ArticleEntity;
+import com.anxpp.soft.tinyspider.simple.csdnweekly.core.CsdnWeeklyArticleEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class ArticleEntityControllerTest {
     private int stage;
 
     @Resource
-    private ArticleController articleController;
+    private CSDNArticleController articleController;
 
     @Before
     public void setUp() throws Exception {
@@ -31,7 +31,7 @@ public class ArticleEntityControllerTest {
 
     @Test
     public void getArticleByStage() throws Exception {
-        List<ArticleEntity> articleEntityList = articleController.getArticleByStage(stage);
+        List<CsdnWeeklyArticleEntity> articleEntityList = articleController.getArticleByStage(stage);
         articleController.getArticleByStage(stage);
         articleController.getArticleByStage(stage);
         Assert.assertNotNull(articleEntityList);

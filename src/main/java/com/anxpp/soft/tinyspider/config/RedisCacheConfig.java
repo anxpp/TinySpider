@@ -33,7 +33,7 @@ public class RedisCacheConfig {
     private String password;
 
     @Bean
-    public KeyGenerator csdnKeyGenerator() {
+    public KeyGenerator keyGenerator() {
         return (target, method, params) -> {
             StringBuilder sb = new StringBuilder();
             sb.append(target.getClass().getName());

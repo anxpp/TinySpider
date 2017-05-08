@@ -1,5 +1,5 @@
 ﻿/*
- * jQuery showLoading plugin v1.0
+ * $ showLoading plugin v1.0
  * 
  * Copyright (c) 2009 Jim Keller
  * Context - http://www.contextllc.com
@@ -10,13 +10,13 @@
  * percentage complete.
  */
 
-jQuery.fn.setLoading = function(pct) {
-    var indicatorID = jQuery(this).attr('id');
+$.fn.setLoading = function(pct) {
+    var indicatorID = $(this).attr('id');
 
     $('#loading-indicator-' + indicatorID).html(pct + '%');
 }
 
-jQuery.fn.showLoading = function(options) {
+$.fn.showLoading = function(options) {
     
     var indicatorID;
     var settings = {
@@ -34,10 +34,10 @@ jQuery.fn.showLoading = function(options) {
        	'overlayHeight': null
     };
 
-    jQuery.extend(settings, options);
+    $.extend(settings, options);
     
-    var loadingDiv = jQuery('<div style="text-align:center"></div>');
-    var overlayDiv = jQuery('<div></div>');
+    var loadingDiv = $('<div style="text-align:center"></div>');
+    var overlayDiv = $('<div></div>');
 
     //
     // Set up ID and classes
@@ -46,37 +46,37 @@ jQuery.fn.showLoading = function(options) {
 	indicatorID = settings.indicatorID;
     }
     else {
-	indicatorID = jQuery(this).attr('id');
+	indicatorID = $(this).attr('id');
     }
 
-    //jQuery(this).resize(function(e) {
+    //$(this).resize(function(e) {
     //    alert("Change event");
     //});
 
-    jQuery(loadingDiv).attr('id', 'loading-indicator-' + indicatorID );
-    jQuery(loadingDiv).addClass('loading-indicator');
+    $(loadingDiv).attr('id', 'loading-indicator-' + indicatorID );
+    $(loadingDiv).addClass('loading-indicator');
 
     if ( settings.addClass ){
-	jQuery(loadingDiv).addClass(settings.addClass);
+	$(loadingDiv).addClass(settings.addClass);
     }
     
     //
     // Create the overlay
     //
-    jQuery(overlayDiv).css('display', 'none');
+    $(overlayDiv).css('display', 'none');
     
     // Append to body, otherwise position() doesn't work on Webkit-based browsers
-    jQuery(document.body).append(overlayDiv);
+    $(document.body).append(overlayDiv);
     
     //
     // Set overlay classes
     //
-    jQuery(overlayDiv).attr('id', 'loading-indicator-' + indicatorID + '-overlay');
+    $(overlayDiv).attr('id', 'loading-indicator-' + indicatorID + '-overlay');
     
-    jQuery(overlayDiv).addClass('loading-indicator-overlay');
+    $(overlayDiv).addClass('loading-indicator-overlay');
     
     if ( settings.addClass ){
-	jQuery(overlayDiv).addClass(settings.addClass + '-overlay');
+	$(overlayDiv).addClass(settings.addClass + '-overlay');
     }
     
     //
@@ -86,8 +86,8 @@ jQuery.fn.showLoading = function(options) {
     var overlay_width;
     var overlay_height;
     
-    var border_top_width = jQuery(this).css('border-top-width');
-    var border_left_width = jQuery(this).css('border-left-width');
+    var border_top_width = $(this).css('border-top-width');
+    var border_left_width = $(this).css('border-left-width');
     
     //
     // IE will return values like 'medium' as the default border, 
@@ -96,38 +96,38 @@ jQuery.fn.showLoading = function(options) {
     border_top_width = isNaN(parseInt(border_top_width)) ? 0 : border_top_width;
     border_left_width = isNaN(parseInt(border_left_width)) ? 0 : border_left_width;
 
-    var overlay_left_pos = jQuery(this).offset().left + parseInt(border_left_width);// +  $(document.body).css( "border-left" );
-    var overlay_top_pos = jQuery(this).offset().top + parseInt(border_top_width);
+    var overlay_left_pos = $(this).offset().left + parseInt(border_left_width);// +  $(document.body).css( "border-left" );
+    var overlay_top_pos = $(this).offset().top + parseInt(border_top_width);
     
     if ( settings.overlayWidth !== null ) {
 	overlay_width = settings.overlayWidth;
     }
     else {
-	overlay_width = parseInt(jQuery(this).width()) + parseInt(jQuery(this).css('padding-right')) + parseInt(jQuery(this).css('padding-left'));
+	overlay_width = parseInt($(this).width()) + parseInt($(this).css('padding-right')) + parseInt($(this).css('padding-left'));
     }
 
     if ( settings.overlayHeight !== null ) {
 	overlay_height = settings.overlayWidth;
     }
     else {
-	overlay_height = parseInt(jQuery(this).height()) + parseInt(jQuery(this).css('padding-top')) + parseInt(jQuery(this).css('padding-bottom'));
+	overlay_height = parseInt($(this).height()) + parseInt($(this).css('padding-top')) + parseInt($(this).css('padding-bottom'));
     }
 
 
-    jQuery(overlayDiv).css('width', overlay_width.toString() + 'px');
-    jQuery(overlayDiv).css('height', overlay_height.toString() + 'px');
+    $(overlayDiv).css('width', overlay_width.toString() + 'px');
+    $(overlayDiv).css('height', overlay_height.toString() + 'px');
 
-    jQuery(overlayDiv).css('left', overlay_left_pos.toString() + 'px');
-    jQuery(overlayDiv).css('position', 'absolute');
+    $(overlayDiv).css('left', overlay_left_pos.toString() + 'px');
+    $(overlayDiv).css('position', 'absolute');
 
-    jQuery(overlayDiv).css('top', overlay_top_pos.toString() + 'px' );
-    jQuery(overlayDiv).css('z-index', settings.overlayZIndex);
+    $(overlayDiv).css('top', overlay_top_pos.toString() + 'px' );
+    $(overlayDiv).css('z-index', settings.overlayZIndex);
 
     //
     // Set any custom overlay CSS		
     //
     if ( settings.overlayCSS ) {
-       	jQuery(overlayDiv).css ( settings.overlayCSS );
+       	$(overlayDiv).css ( settings.overlayCSS );
     }
 
 
@@ -135,11 +135,11 @@ jQuery.fn.showLoading = function(options) {
     // We have to append the element to the body first
     // or .width() won't work in Webkit-based browsers (e.g. Chrome, Safari)
     //
-    jQuery(loadingDiv).css('display', 'none');
-    jQuery(document.body).append(loadingDiv);
+    $(loadingDiv).css('display', 'none');
+    $(document.body).append(loadingDiv);
     
-    jQuery(loadingDiv).css('position', 'absolute');
-    jQuery(loadingDiv).css('z-index', settings.indicatorZIndex);
+    $(loadingDiv).css('position', 'absolute');
+    $(loadingDiv).css('z-index', settings.indicatorZIndex);
 
     //
     // Set top margin
@@ -162,32 +162,32 @@ jQuery.fn.showLoading = function(options) {
     // set horizontal position
     //
     if ( settings.hPos.toString().toLowerCase() == 'center' ) {
-	jQuery(loadingDiv).css('left', (indicatorLeft + ((jQuery(overlayDiv).width() - parseInt(jQuery(loadingDiv).width())) / 2)).toString()  + 'px');
+	$(loadingDiv).css('left', (indicatorLeft + (($(overlayDiv).width() - parseInt($(loadingDiv).width())) / 2)).toString()  + 'px');
     }
     else if ( settings.hPos.toString().toLowerCase() == 'left' ) {
-	jQuery(loadingDiv).css('left', (indicatorLeft + parseInt(jQuery(overlayDiv).css('margin-left'))).toString() + 'px');
+	$(loadingDiv).css('left', (indicatorLeft + parseInt($(overlayDiv).css('margin-left'))).toString() + 'px');
     }
     else if ( settings.hPos.toString().toLowerCase() == 'right' ) {
-	jQuery(loadingDiv).css('left', (indicatorLeft + (jQuery(overlayDiv).width() - parseInt(jQuery(loadingDiv).width()))).toString()  + 'px');
+	$(loadingDiv).css('left', (indicatorLeft + ($(overlayDiv).width() - parseInt($(loadingDiv).width()))).toString()  + 'px');
     }
     else {
-	jQuery(loadingDiv).css('left', (indicatorLeft + parseInt(settings.hPos)).toString() + 'px');
+	$(loadingDiv).css('left', (indicatorLeft + parseInt(settings.hPos)).toString() + 'px');
     }		
 
     //
     // set vertical position
     //
     if ( settings.vPos.toString().toLowerCase() == 'center' ) {
-	jQuery(loadingDiv).css('top', (indicatorTop + ((jQuery(overlayDiv).height() - parseInt(jQuery(loadingDiv).height())) / 2)).toString()  + 'px');
+	$(loadingDiv).css('top', (indicatorTop + (($(overlayDiv).height() - parseInt($(loadingDiv).height())) / 2)).toString()  + 'px');
     }
     else if ( settings.vPos.toString().toLowerCase() == 'top' ) {
-	jQuery(loadingDiv).css('top', indicatorTop.toString() + 'px');
+	$(loadingDiv).css('top', indicatorTop.toString() + 'px');
     }
     else if ( settings.vPos.toString().toLowerCase() == 'bottom' ) {
-	jQuery(loadingDiv).css('top', (indicatorTop + (jQuery(overlayDiv).height() - parseInt(jQuery(loadingDiv).height()))).toString()  + 'px');
+	$(loadingDiv).css('top', (indicatorTop + ($(overlayDiv).height() - parseInt($(loadingDiv).height()))).toString()  + 'px');
     }
     else {
-	jQuery(loadingDiv).css('top', (indicatorTop + parseInt(settings.vPos)).toString() + 'px' );
+	$(loadingDiv).css('top', (indicatorTop + parseInt(settings.vPos)).toString() + 'px' );
     }		
 
 
@@ -197,7 +197,7 @@ jQuery.fn.showLoading = function(options) {
     // Set any custom css for loading indicator
     //
     if ( settings.css ) {
-       	jQuery(loadingDiv).css ( settings.css );
+       	$(loadingDiv).css ( settings.css );
     }
 
     
@@ -221,12 +221,12 @@ jQuery.fn.showLoading = function(options) {
     //
     // Show the overlay
     //
-    jQuery(overlayDiv).show();
+    $(overlayDiv).show();
     
     //
     // Show the loading indicator
     //
-    jQuery(loadingDiv).show();
+    $(loadingDiv).show();
 
     //
     // afterShow callback
@@ -239,22 +239,22 @@ jQuery.fn.showLoading = function(options) {
 };
 
 
-jQuery.fn.hideLoading = function(options) {
+$.fn.hideLoading = function(options) {
     
     
     var settings = {};
     
-    jQuery.extend(settings, options);
+    $.extend(settings, options);
 
     if ( settings.indicatorID ) {
 	indicatorID = settings.indicatorID;
     }
     else {
-	indicatorID = jQuery(this).attr('id');
+	indicatorID = $(this).attr('id');
     }
     
-    jQuery(document.body).find('#loading-indicator-' + indicatorID ).remove();
-    jQuery(document.body).find('#loading-indicator-' + indicatorID + '-overlay' ).remove();
+    $(document.body).find('#loading-indicator-' + indicatorID ).remove();
+    $(document.body).find('#loading-indicator-' + indicatorID + '-overlay' ).remove();
     
     return this;
 };
