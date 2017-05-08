@@ -1,6 +1,6 @@
 package com.anxpp.soft.tinyspider.simple.csdnweekly.core;
 
-import com.anxpp.soft.tinyspider.Utils.ArticleSpider;
+import com.anxpp.soft.tinyspider.Utils.TinySpider;
 import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,7 +31,7 @@ public class CsdnWeeklyArticleServiceImpl implements CsdnWeeklyArticleService {
     @Override
     @Cacheable(value = "csdnweekly", keyGenerator = "keyGenerator")
     public List<CsdnWeeklyArticleEntity> forWeekly(Integer stage) throws Exception {
-        List<CsdnWeeklyArticleEntity> articleEntityList = ArticleSpider.forEntityList(preUrl + stage, csdnWeeklyDocumentAnalyzer, CsdnWeeklyArticleEntity.class);
+        List<CsdnWeeklyArticleEntity> articleEntityList = TinySpider.forEntityList(preUrl + stage, csdnWeeklyDocumentAnalyzer, CsdnWeeklyArticleEntity.class);
         articleEntityList.forEach(article -> article.setStage(stage));
         csdnWeeklyArticleRepo.save(articleEntityList);
         return articleEntityList;

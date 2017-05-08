@@ -12,9 +12,9 @@ import java.util.List;
  * 文章抓取工具
  * Created by anxpp.com on 2017/3/11.
  */
-public class ArticleSpider {
+public class TinySpider {
 
-    private static final Logger log = LoggerFactory.getLogger(ArticleSpider.class);
+    private static final Logger log = LoggerFactory.getLogger(TinySpider.class);
 
     public static <T> List<T> forEntityList(String url, DocumentAnalyzer docAnalyzer, Class<T> type) throws Exception {
 

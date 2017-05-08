@@ -14,4 +14,11 @@ public interface ReviewingService {
      * @return 文章列表
      */
     List<ReviewingEntity> forWeekly(Integer stage) throws Exception;
+
+    /**
+     * 查找影评
+     *
+     * @param text 关键字
+     */
+    List<MovieEntity> findReviewing(String text) throws Exception;
 }
