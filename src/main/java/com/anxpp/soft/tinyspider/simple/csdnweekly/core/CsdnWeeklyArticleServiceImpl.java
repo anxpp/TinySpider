@@ -20,7 +20,7 @@ public class CsdnWeeklyArticleServiceImpl implements CsdnWeeklyArticleService {
     @Resource
     private DocumentAnalyzer csdnWeeklyDocumentAnalyzer;
     @Resource
-    CsdnWeeklyArticleRepo csdnWeeklyArticleRepo;
+    private CsdnWeeklyArticleRepo csdnWeeklyArticleRepo;
 
     /**
      * 根据期号获取文章列表

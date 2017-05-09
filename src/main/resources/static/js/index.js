@@ -141,6 +141,7 @@ function getMcnbetaArticles() {
  */
 function getMovies() {
     $('#content_search_result').showLoading();
+    $('#content_search_result').slideUp();
     $.ajax({
         url: '/douban/movie/search/'+$('#input_movie_name').val(),
         type: "get",
@@ -163,7 +164,9 @@ function getMovies() {
                 contents.push(' <div style="height: 2px; background: #eee;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></div>');
                 contents.push('</div>');
             }
+            $('#content_search_result').empty();
             $('#content_search_result').append(contents.join(''));
+            $('#content_search_result').slideDown();
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             $('#content_search_result').append('<h1>获取失败</h1>');

@@ -21,7 +21,7 @@ public interface ReviewingService {
      *
      * @param text 关键字
      */
-    List<MovieEntity> findReviewing(String text) throws Exception;
+    List<MovieEntity> findMovie(String text) throws Exception;
 
     /**
      * 设置总评论数

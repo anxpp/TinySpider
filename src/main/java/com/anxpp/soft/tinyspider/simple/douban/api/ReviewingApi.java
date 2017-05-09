@@ -32,7 +32,7 @@ public class ReviewingApi {
     @ResponseBody
     @GetMapping("/search/{text}")
     public List<MovieEntity> search(@PathVariable("text") String text) throws Exception {
-        return reviewingService.findReviewing(text);
+        return reviewingService.findMovie(text);
     }
 
     /**

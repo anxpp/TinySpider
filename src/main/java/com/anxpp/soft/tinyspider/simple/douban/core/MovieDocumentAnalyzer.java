@@ -29,17 +29,6 @@ public class MovieDocumentAnalyzer implements DocumentAnalyzer {
      * @return 结果
      */
     @Override
-    public List<Map<String, Object>> forListMap(Document document) {
-        return forListMap(document, null);
-    }
-
-    /**
-     * 根据html文档对象获取List<Map>
-     *
-     * @param document html文档对象
-     * @return 结果
-     */
-    @Override
     public List<Map<String, Object>> forListMap(Document document, Object info) {
         List<Map<String, Object>> results = new ArrayList<>();
         if (ObjectUtils.isEmpty(document))
