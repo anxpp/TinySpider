@@ -23,6 +23,18 @@ public class MovieEntity {
 
     private String img;
 
+    private Integer countReviewing;
+
+    private Integer current;
+
+    private Integer state;
+
+    public MovieEntity() {
+        this.countReviewing = 100;
+        this.current = 0;
+        this.state = 0;
+    }
+
     public String getId() {
         return id;
     }
@@ -69,5 +81,29 @@ public class MovieEntity {
 
     public void setImg(String img) {
         this.img = img;
+    }
+
+    public Integer getCountReviewing() {
+        return countReviewing;
+    }
+
+    public void setCountReviewing(Integer countReviewing) {
+        this.countReviewing = countReviewing;
+    }
+
+    public Integer getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(Integer current) {
+        this.current = current;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
     }
 }

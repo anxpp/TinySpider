@@ -7,8 +7,9 @@ var mcnbetaPage = 1;
  * 入口
  */
 $(function () {
-    var canvas =document.getElementById('canvas_test');
-    function isIE9(){
+    var canvas = document.getElementById('canvas_test');
+
+    function isIE9() {
         var userAgent = navigator.userAgent;
         var isOpera = userAgent.indexOf("Opera") > -1;
         var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera;
@@ -17,7 +18,8 @@ $(function () {
         var fIEVersion = parseFloat(RegExp["$1"]);
         return isIE && fIEVersion == 9;
     }
-    if(!canvas || !canvas.getContext || isIE9()){
+
+    if (!canvas || !canvas.getContext || isIE9()) {
         $('iframe').hide();
         $('div.header').addClass('intro-header');
         $('#div_header_main').show();
@@ -39,7 +41,7 @@ $(function () {
 /**
  * 初始化CSDN菜单
  */
-function initCsdnweekly(){
+function initCsdnweekly() {
     $('#menu_csdnweekly').children().slideUp();
     for (var i = 54; i >= 1; i--) {
         $('#menu_csdnweekly').append('<button onclick="getCsdnweeklyArticles(this,' + i + ')" style="display: none;width:100%;text-align: center;padding: 5% 0" type="button" class="list-group-item">第' + i + '周</button>');
@@ -55,8 +57,8 @@ function initCsdnweekly(){
 function getCsdnweeklyArticles(e, i) {
     $('#content_csdnweekly').slideUp('fast');
     $('#content_csdnweekly').showLoading();
-    $('#menu_csdnweekly button').css("color","#888");
-    $(e).css("color","#111");
+    $('#menu_csdnweekly button').css("color", "#888");
+    $(e).css("color", "#111");
     $.ajax({
         url: '/csdnweekly/article/get/stage/' + i,
         type: "get",
@@ -101,20 +103,20 @@ function getMcnbetaArticles() {
     $('#a_mcnbeta_next').fadeOut();
     $('#content_mcnbeta').showLoading();
     $.ajax({
-        url: '/mcnbeta/article/get/page/'+mcnbetaPage,
+        url: '/mcnbeta/article/get/page/' + mcnbetaPage,
         type: "get",
         dataType: "json",
         success: function (result) {
-            var articles= result.result.list;
+            var articles = result.result.list;
             var contents = [];
             for (var i in articles) {
                 contents.push('<div class="row">');
                 contents.push('<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="padding:2%;">');
-                contents.push('     <a target="_blank" href="'+ pre + articles[i].url + '"><img style="width: 100%;max-width: 60px; height: auto; overflow: hidden;" src="' + articles[i].thumb + '" /></a>');
+                contents.push('     <a target="_blank" href="' + pre + articles[i].url + '"><img style="width: 100%;max-width: 60px; height: auto; overflow: hidden;" src="' + articles[i].thumb + '" /></a>');
                 contents.push('</div>');
                 contents.push(' <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">');
                 contents.push('     <div class="row">');
-                contents.push('         <div style="padding: 2% 0" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a target="_blank" href="'+ pre + articles[i].url + '">' + articles[i].title + '</a></div>');
+                contents.push('         <div style="padding: 2% 0" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a target="_blank" href="' + pre + articles[i].url + '">' + articles[i].title + '</a></div>');
                 contents.push('         <div style="padding: 2% 0" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 simple-span">类别：' + articles[i].label + ' -- 时间：' + articles[i].inputtime + '</div>');
                 contents.push('     </div>');
                 contents.push(' </div>');
@@ -143,22 +145,22 @@ function getMovies() {
     $('#content_search_result').showLoading();
     $('#content_search_result').slideUp();
     $.ajax({
-        url: '/douban/movie/search/'+$('#input_movie_name').val(),
+        url: '/douban/movie/search/' + $('#input_movie_name').val(),
         type: "get",
         dataType: "json",
         success: function (result) {
-            var movies= result;
+            var movies = result;
             var contents = [];
             for (var i in movies) {
                 contents.push('<div class="row">');
                 contents.push('<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="padding:2%;">');
-                contents.push('     <a target="_blank" href="'+ movies[i].id + '"><img style="width: 100%;max-width: 60px; height: auto; overflow: hidden;" src="' + movies[i].img + '" /></a>');
+                contents.push('     <a target="_blank" href="' + movies[i].id + '"><img style="width: 100%;max-width: 60px; height: auto; overflow: hidden;" src="' + movies[i].img + '" /></a>');
                 contents.push('</div>');
                 contents.push(' <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">');
                 contents.push('     <div class="row">');
-                contents.push('         <div style="padding: 2% 0" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a target="_blank" href="'+ movies[i].id + '">' + movies[i].name + '</a></div>');
+                contents.push('         <div style="padding: 2% 0" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><a target="_blank" href="' + movies[i].id + '">' + movies[i].name + '</a></div>');
                 contents.push('         <div style="padding: 2% 0" class="simple-span" style="width: 160px;">评分：' + movies[i].rating + ' -- 评论数：' + movies[i].comments + '</div>');
-                contents.push('         <button type="button" onclick="getMovieComments(\''+movies[i].id+'\')" class="btn btn-default">抓取有效影评</button>');
+                contents.push('         <button type="button" onclick="getMovieComments(\'' + movies[i].id + '\')" class="btn btn-default">抓取有效影评</button>');
                 contents.push('     </div>');
                 contents.push(' </div>');
                 contents.push(' <div style="height: 2px; background: #eee;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></div>');
@@ -180,8 +182,22 @@ function getMovies() {
  * 提交影评抓取任务
  * @param url 地址
  */
-function getMovieComments(url){
-    $.get('/douban/movie/comments/'+url.split('/')[4],function () {
-        alert('任务提交成功！再次点击获取任务进度');
+function getMovieComments(id) {
+    $.get('/douban/movie/comments/' + id, function (result) {
+        var state = parseInt(result.state);
+        switch (state) {
+            case 0:
+                alert('任务提交成功！再次点击获取任务进度');
+                break;
+            case 1:
+                alert('进行中，进度：' + result.current + '/' + result.total);
+                break;
+            case 2:
+                alert('已完成');
+                break;
+            default:
+                alert('状态未知！');
+                break;
+        }
     });
 }

@@ -29,5 +29,5 @@ public interface ReviewingService {
      * @param id    id
      * @param count count
      */
-    void setCount(String id, Integer count);
+    void setCount(String id, int count);
 }

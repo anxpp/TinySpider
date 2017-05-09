@@ -39,7 +39,7 @@ public class MovieDocumentAnalyzer implements DocumentAnalyzer {
                 Element tr = ele.nextElementSibling().child(0).child(0);
                 Element a = tr.child(1).getElementsByTag("a").first();
                 result.put("name", a.text());
-                result.put("id", a.attr("href"));
+                result.put("id", a.attr("href").replaceAll("\\D+", ""));
                 Element div = tr.getElementsByClass("pl").get(1).parent();
                 result.put("rating", Double.valueOf(div.getElementsByClass("rating_nums").get(0).text()));
                 result.put("comments", Integer.valueOf(div.getElementsByClass("pl").get(0).text().replaceAll("\\D+", "")));
