@@ -52,9 +52,10 @@ public class CommentDocumentAnalyzer implements DocumentAnalyzer {
         document.body().getElementById("comments").getElementsByClass("comment-item").forEach(ele -> {
             try {
                 Map<String, Object> result = new HashMap<>();
-                result.put("author", ele.getElementsByClass("avatar").get(0).getElementsByTag("a").get(0).attr("title"));
+                result.put("author", ele.getElementsByClass("avatar").get(0).getElementsByTag("a").get(0).attr("title").replaceAll("[^\\u0000-\\uFFFF]", ""));
                 result.put("countUseful", Integer.valueOf(ele.getElementsByClass("comment").get(0).getElementsByClass("votes").get(0).text()));
-                result.put("comment", ele.getElementsByClass("comment").get(0).getElementsByTag("p").get(0).text());
+                //需要过滤emoji
+                result.put("comment", ele.getElementsByClass("comment").get(0).getElementsByTag("p").get(0).text().replaceAll("[^\\u0000-\\uFFFF]", ""));
                 result.put("date", ele.getElementsByClass("comment").get(0).getElementsByClass("comment-time").get(0).text());
                 result.put("rating", rating.get(ele.getElementsByClass("comment").get(0).getElementsByClass("rating").get(0).attr("class")));
                 result.put("movieId", id.toString());

@@ -182,10 +182,32 @@ function getMovies() {
  * 提交影评抓取任务
  * @param url 地址
  */
+var type = 0;
+var key = "";
 function getMovieComments(id) {
-    $.get('/douban/movie/comments/' + id, function (result) {
-        var state = parseInt(result.state);
-        switch (state) {
+    var params = {};
+    $('#form_check').slideUp();
+    var code = $('#check_img_value').val();
+    if (code.length > 0 && type == 8)
+        params['code'] = code;
+    if (code.length > 0 && type == 88){
+        params['robot'] = code+','+key;
+    }
+    $('#check_img_value').val('');
+    $.get('/douban/movie/comments/' + id, params, function (result) {
+        type = parseInt(result.state);
+        switch (type) {
+            case 8:
+                console.log('需要验证码登陆');
+                $('#form_check').slideDown();
+                $('#check_img').attr('src', result.src);
+                break;
+            case 88:
+                console.log('需要机器人验证');
+                $('#form_check').slideDown();
+                $('#check_img').attr('src', result.src);
+                key = result.state;
+                break;
             case 0:
                 alert('任务提交成功！再次点击获取任务进度');
                 break;

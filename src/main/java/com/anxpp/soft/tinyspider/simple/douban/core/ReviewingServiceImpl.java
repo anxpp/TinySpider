@@ -4,16 +4,19 @@ import com.anxpp.soft.tinyspider.Utils.TinySpider;
 import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -58,9 +61,43 @@ public class ReviewingServiceImpl implements ReviewingService {
      * @return 文章列表
      */
     @Override
-    public Map<String, Integer> forComments(String id) throws Exception {
+    public Map<String, Object> forComments(String id, String code, String robot) throws Exception {
         log.info("ReviewingServiceImpl::forComments -> begin:" + id);
-        Map<String, Integer> map = new HashMap<>(3);
+        Map<String, Object> map = new HashMap<>(3);
+
+        //是否需要机器人验证
+        if(StringUtils.hasText(robot)){
+            imNotRobot(robot);
+        }
+
+        //如果有验证码，则直接登陆
+        if (StringUtils.hasText(code) && cookiesOfDouban.isEmpty()) {
+            log.info("To login with code:" + id);
+            doLogin(code);
+        }
+
+        //需要登录
+        if (cookiesOfDouban.isEmpty()) {
+            log.info("To login:" + id);
+            //到登录界面，获取是否需要验证码
+            String[] checks = getCheckImg();
+            if (checks != null) {
+                if(checks[0].equals("login")){
+                    //返回需要登录
+                    map.put("state", 8);
+                    map.put("src", checks[1]);
+                    return map;
+                }else{
+                    //返回需要验证机器人
+                    map.put("state", 88);
+                    map.put("src", checks[1]);
+                    map.put("key", checks[2]);
+                    return map;
+                }
+            }
+        }
+
+        //判断进度等信息
         ProcessingInfo processingInfo = info.get(id);
         if (processingInfo != null) {
             log.info("ReviewingServiceImpl::forComments -> processing");
@@ -80,6 +117,7 @@ public class ReviewingServiceImpl implements ReviewingService {
             //check movie from database
             MovieEntity movieEntity = movieRepo.findOne(id);
             if (movieEntity != null) {
+                log.info("already stared， now continue ...");
                 //already complete
                 if (movieEntity.getState() == 2) {
                     map.put("state", 2);
@@ -122,7 +160,10 @@ public class ReviewingServiceImpl implements ReviewingService {
     @Override
     public List<MovieEntity> findMovie(String text) throws Exception {
         List<MovieEntity> result = TinySpider.forEntityList(preUrlOfSearch + text, movieDocumentAnalyzer, MovieEntity.class);
-        movieRepo.save(result);
+        result.forEach(movieEntity -> {
+            if (!movieRepo.exists(movieEntity.getId()))
+                movieRepo.save(movieEntity);
+        });
         return result;
     }
 
@@ -162,9 +203,16 @@ public class ReviewingServiceImpl implements ReviewingService {
                     doLogin();
                 //开始任务
                 ProcessingInfo processingInfo = info.get(id);
+                Random random = new Random();
                 while (true) {
+                    int i = random.nextInt(5000) + 5000;
                     try {
-                        int current = processingInfo.getAndIncreaseCurrentIndex();
+                        Thread.currentThread().sleep(i);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    int current = processingInfo.getAndIncreaseCurrentIndex();
+                    try {
                         List<CommentEntity> result = TinySpider.forEntityList(preUrlOfComment + id + "/comments?start=" + current, commentDocumentAnalyzer, CommentEntity.class, id, cookiesOfDouban);
                         //保存评论
                         save(result);
@@ -172,8 +220,9 @@ public class ReviewingServiceImpl implements ReviewingService {
                         updateMovieCurrent(id, current);
                     } catch (Exception e) {
                         log.info("SpiderTask::start");
+                        processingInfo.setCurrentIndex(Math.max(0, current - ProcessingInfo.PAGE_SIZE));
                         e.printStackTrace();
-                        doLogin();
+//                        doLogin();
                         try {
                             Thread.currentThread().sleep(1000 * 30);
                         } catch (InterruptedException e1) {
@@ -208,13 +257,61 @@ public class ReviewingServiceImpl implements ReviewingService {
         movieRepo.save(movieEntity);
     }
 
+    //登录
     private void doLogin() {
+        doLogin(null);
+    }
+
+    private void doLogin(String code) {
+        log.info("ReviewingServiceImpl::doLogin");
         try {
-            cookiesOfDouban = Jsoup.connect("https://accounts.douban.com/login").headers(header()).method(Connection.Method.POST).data(params()).execute().cookies();
+            cookiesOfDouban = Jsoup.connect("https://accounts.douban.com/login").headers(header()).method(Connection.Method.POST).data(params(code)).execute().cookies();
         } catch (IOException e) {
-            log.info("doLogin");
+            log.info("ReviewingServiceImpl::doLogin IOException");
             e.printStackTrace();
         }
+    }
+
+    private void imNotRobot(String robot) {
+        log.info("ReviewingServiceImpl::imNotRobot");
+        try {
+            Map<String, String> data = new HashMap<>();
+            String[] params = robot.split(",");
+            data.put("ck","cKqf");
+            data.put("captcha-solution",params[0]);
+            data.put("captcha-id",params[1]);
+            data.put("original-url","https%253A%252F%252Fmovie.douban.com%252F");
+            cookiesOfDouban = Jsoup.connect("https://accounts.douban.com/login").headers(header()).method(Connection.Method.POST).data(data).execute().cookies();
+        } catch (IOException e) {
+            log.info("ReviewingServiceImpl::imNotRobot IOException");
+            e.printStackTrace();
+        }
+    }
+
+    //获取登陆验证码
+    private String[] getCheckImg() {
+        log.info("ReviewingServiceImpl::getCheckImg get the check image");
+        String[] result = new String[2];
+        //captcha_image
+        try {
+            Element body = Jsoup.connect("https://accounts.douban.com/login").get().body();
+            //首先判断是否需要验证机器人
+            Element imgRobot = body.getElementsByAttributeValue("alt", "captcha").get(0);
+            if (imgRobot != null) {
+                result[0] = "robot";
+                result[1] = imgRobot.attr("src");
+                result[2] = body.getElementsByAttributeValue("name", "captcha-id").get(0).val();
+            }
+            Element img = body.getElementById("captcha_image");
+            if (img != null) {//captcha-id
+                result[0] = "login";
+                result[1] = img.attr("src");
+            }
+        } catch (IOException e) {
+            log.info("ReviewingServiceImpl::getCheckImg IOException");
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //登陆需要的header
@@ -224,7 +321,7 @@ public class ReviewingServiceImpl implements ReviewingService {
         header.put("Accept-Encoding", "gzip, deflate, sdch, br");
         header.put("Accept-Language", "zh-CN,zh;q=0.8");
         header.put("Connection", "keep-alive");
-        header.put("Cookie", "bid=wfWEGLIV_NI; ll=\"108296\"; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1494244457%2C%22https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3DpXUgsqzqW_NO4uLREOlJQo4jlCNmwr-5oCyxAzIVz4C%26wd%3D%26eqid%3D975a0c4c00001b6d0000000459105c65%22%5D; _pk_id.100001.8cb4=2d5a11571a1aff9f.1490751991.8.1494244458.1494205377.; ps=y; _vwo_uuid_v2=3169EE1AEB5C338D6B43765087F1EC68|951b48cc61b26e01db33b23ffbbe56eb; push_noty_num=0; push_doumail_num=0; as=\"https://movie.douban.com/subject/25818101/comments?start=10000&limit=20&sort=new_score&status=P\"; ap=1; __utmt=1; __utma=30149280.1958286939.1490751992.1494308103.1494310923.11; __utmb=30149280.3.10.1494310923; __utmc=30149280; __utmz=30149280.1494308103.10.7.utmcsr=accounts.douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/login");
+//        header.put("Cookie", "bid=wfWEGLIV_NI; ll=\"108296\"; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1494244457%2C%22https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3DpXUgsqzqW_NO4uLREOlJQo4jlCNmwr-5oCyxAzIVz4C%26wd%3D%26eqid%3D975a0c4c00001b6d0000000459105c65%22%5D; _pk_id.100001.8cb4=2d5a11571a1aff9f.1490751991.8.1494244458.1494205377.; ps=y; _vwo_uuid_v2=3169EE1AEB5C338D6B43765087F1EC68|951b48cc61b26e01db33b23ffbbe56eb; push_noty_num=0; push_doumail_num=0; as=\"https://movie.douban.com/subject/25818101/comments?start=10000&limit=20&sort=new_score&status=P\"; ap=1; __utmt=1; __utma=30149280.1958286939.1490751992.1494308103.1494310923.11; __utmb=30149280.3.10.1494310923; __utmc=30149280; __utmz=30149280.1494308103.10.7.utmcsr=accounts.douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/login");
         header.put("Host", "movie.douban.com");
         header.put("Referer", "https://movie.douban.com/explore");
         header.put("Upgrade-Insecure-Requests", "1");
@@ -232,13 +329,14 @@ public class ReviewingServiceImpl implements ReviewingService {
         return header;
     }
 
-    private Map<String, String> params() {
+    private Map<String, String> params(String code) {
         Map<String, String> header = new HashMap<>();
         header.put("source", "movie");
         header.put("redir", "https://movie.douban.com/");
         header.put("form_email", "15215229221");
         header.put("form_password", "123698745");
-//        header.put("captcha-solution", "hearing");
+        if (StringUtils.hasText(code))
+            header.put("captcha-solution", code);
         header.put("login", "登录");
         return header;
     }
@@ -247,14 +345,14 @@ public class ReviewingServiceImpl implements ReviewingService {
      * 数据抓取的进度信息
      */
     private static class ProcessingInfo {
-        private final static int PAGE_SIZE = 20;
+        final static int PAGE_SIZE = 20;
         //总评论数
         volatile int count;
         //当前抓取的位置
         volatile int currentIndex;
 
         boolean isFinish() {
-            return currentIndex >= count;
+            return currentIndex >= count || currentIndex > 11000;
         }
 
         int getCount() {

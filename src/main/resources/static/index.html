@@ -80,6 +80,14 @@
                                     </div>
                                     <button type="button" onclick="getMovies()" class="btn btn-default">搜索</button>
                                 </form>
+                                <form id="form_check" class="form-inline" style="display: none">
+                                    <div class="form-group">
+                                        <label for="check_img_value">验证码：</label>
+                                        <img id="check_img" src="">;
+                                        <input type="text" class="form-control" id="check_img_value" placeholder="key">
+                                    </div>
+                                    <button type="button" onclick="getMovieComments()" class="btn btn-default">登陆</button>
+                                </form>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-md-offset-2 col-lg-12 col-lg-offset-2" id="content_search_result" style="max-height: 568px;overflow: auto;overflow-x: hidden;margin: 0;padding: 0 10%; "></div>
                         </div>
