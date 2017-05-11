@@ -5,6 +5,7 @@ import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -296,8 +297,9 @@ public class ReviewingServiceImpl implements ReviewingService {
         try {
             Element body = Jsoup.connect("https://accounts.douban.com/login").get().body();
             //首先判断是否需要验证机器人
-            Element imgRobot = body.getElementsByAttributeValue("alt", "captcha").get(0);
-            if (imgRobot != null) {
+            Elements imgRobots = body.getElementsByAttributeValue("alt", "captcha");
+            if (imgRobots.size()>0&&imgRobots.get(0) != null) {
+                Element imgRobot = imgRobots.get(0);
                 result[0] = "robot";
                 result[1] = imgRobot.attr("src");
                 result[2] = body.getElementsByAttributeValue("name", "captcha-id").get(0).val();
