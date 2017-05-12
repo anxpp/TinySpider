@@ -43,6 +43,8 @@ public class ReviewingServiceImpl implements ReviewingService {
     //当前网页的cookies
     private volatile Map<String, String> cookiesOfDouban = new HashMap<>();
 
+    private static final int MIN_INTERVAL = 1993;
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Value("${url.douban.movie.search.preurl}")
@@ -223,7 +225,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                     }
 
                     long now = System.currentTimeMillis();
-                    if (now - lastTime.longValue() < 1000)
+                    if (now - lastTime.longValue() < MIN_INTERVAL)
                         continue;
                     lastTime.set(now);
 
