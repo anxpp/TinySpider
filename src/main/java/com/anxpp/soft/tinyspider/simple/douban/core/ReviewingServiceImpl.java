@@ -249,6 +249,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                     }
                     if (processingInfo.isFinish()) {
                         log.info("complete:" + id);
+                        updateMovieState(id, 2);
                         break;
                     }
                 }
