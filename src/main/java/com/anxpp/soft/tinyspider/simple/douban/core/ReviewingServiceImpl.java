@@ -21,6 +21,8 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 文章service实现
@@ -31,6 +33,12 @@ public class ReviewingServiceImpl implements ReviewingService {
 
     //
     private ConcurrentHashMap<String, ProcessingInfo> info = new ConcurrentHashMap<>();
+
+    //当前任务数
+    private AtomicInteger countTask = new AtomicInteger();
+
+    //用于防止多个线程同时执行
+    private AtomicLong lastTime = new AtomicLong();
 
     //当前网页的cookies
     private volatile Map<String, String> cookiesOfDouban = new HashMap<>();
@@ -67,7 +75,7 @@ public class ReviewingServiceImpl implements ReviewingService {
         Map<String, Object> map = new HashMap<>(3);
 
         //是否需要机器人验证
-        if(StringUtils.hasText(robot)){
+        if (StringUtils.hasText(robot)) {
             imNotRobot(robot);
         }
 
@@ -83,12 +91,12 @@ public class ReviewingServiceImpl implements ReviewingService {
             //到登录界面，获取是否需要验证码
             String[] checks = getCheckImg();
             if (checks != null) {
-                if(checks[0].equals("login")){
+                if (checks[0].equals("login")) {
                     //返回需要登录
                     map.put("state", 8);
                     map.put("src", checks[1]);
                     return map;
-                }else{
+                } else {
                     //返回需要验证机器人
                     map.put("state", 88);
                     map.put("src", checks[1]);
@@ -199,6 +207,7 @@ public class ReviewingServiceImpl implements ReviewingService {
         void start(String id) {
             log.info("SpiderTask::start -> begin task");
             executor.execute(() -> {
+                countTask.addAndGet(1);
                 //首先登陆获取cookies
                 if (cookiesOfDouban.isEmpty())
                     doLogin();
@@ -206,12 +215,18 @@ public class ReviewingServiceImpl implements ReviewingService {
                 ProcessingInfo processingInfo = info.get(id);
                 Random random = new Random();
                 while (true) {
-                    int i = random.nextInt(5000) + 5000;
+                    int i = random.nextInt(30000) + 10000;
                     try {
                         Thread.currentThread().sleep(i);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
+
+                    long now = System.currentTimeMillis();
+                    if (now - lastTime.longValue() < 1000)
+                        continue;
+                    lastTime.set(now);
+
                     int current = processingInfo.getAndIncreaseCurrentIndex();
                     try {
                         List<CommentEntity> result = TinySpider.forEntityList(preUrlOfComment + id + "/comments?start=" + current, commentDocumentAnalyzer, CommentEntity.class, id, cookiesOfDouban);
@@ -235,6 +250,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                         break;
                     }
                 }
+                countTask.set(countTask.intValue() - 1);
                 log.info("SpiderTask::start -> end task");
             });
         }
@@ -278,10 +294,10 @@ public class ReviewingServiceImpl implements ReviewingService {
         try {
             Map<String, String> data = new HashMap<>();
             String[] params = robot.split(",");
-            data.put("ck","cKqf");
-            data.put("captcha-solution",params[0]);
-            data.put("captcha-id",params[1]);
-            data.put("original-url","https%253A%252F%252Fmovie.douban.com%252F");
+            data.put("ck", "cKqf");
+            data.put("captcha-solution", params[0]);
+            data.put("captcha-id", params[1]);
+            data.put("original-url", "https%253A%252F%252Fmovie.douban.com%252F");
             cookiesOfDouban = Jsoup.connect("https://accounts.douban.com/login").headers(header()).method(Connection.Method.POST).data(data).execute().cookies();
         } catch (IOException e) {
             log.info("ReviewingServiceImpl::imNotRobot IOException");
@@ -298,7 +314,7 @@ public class ReviewingServiceImpl implements ReviewingService {
             Element body = Jsoup.connect("https://accounts.douban.com/login").get().body();
             //首先判断是否需要验证机器人
             Elements imgRobots = body.getElementsByAttributeValue("alt", "captcha");
-            if (imgRobots.size()>0&&imgRobots.get(0) != null) {
+            if (imgRobots.size() > 0 && imgRobots.get(0) != null) {
                 Element imgRobot = imgRobots.get(0);
                 result[0] = "robot";
                 result[1] = imgRobot.attr("src");

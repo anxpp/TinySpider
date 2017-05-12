@@ -24,7 +24,7 @@ public class TinySpider {
 
     public static <T> List<T> forEntityList(String url, DocumentAnalyzer docAnalyzer, Class<T> type, Object info, Map<String, String> cookies) throws Exception {
 
-        log.info("开始抓取文章：" + url);
+        log.info("spider is working ：" + url);
 
         List<T> results = new ArrayList<>();
         Connection connection = Jsoup.connect(url).timeout(50000);

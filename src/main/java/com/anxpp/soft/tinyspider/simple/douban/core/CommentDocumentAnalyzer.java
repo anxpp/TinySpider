@@ -43,7 +43,7 @@ public class CommentDocumentAnalyzer implements DocumentAnalyzer {
      */
     @Override
     public List<Map<String, Object>> forListMap(Document document, Object id) {
-        log.info("CommentDocumentAnalyzer::forListMap start");
+//        log.info("CommentDocumentAnalyzer::forListMap start");
         List<Map<String, Object>> results = new ArrayList<>();
         if (ObjectUtils.isEmpty(document))
             return results;
@@ -63,7 +63,7 @@ public class CommentDocumentAnalyzer implements DocumentAnalyzer {
             } catch (Exception ignored) {
             }
         });
-        log.info("CommentDocumentAnalyzer::forListMap complete");
+//        log.info("CommentDocumentAnalyzer::forListMap complete");
         return results;
     }
 }

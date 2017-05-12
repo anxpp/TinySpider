@@ -1,5 +1,6 @@
 package com.anxpp.soft.tinyspider.simple.douban.core;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -11,6 +12,7 @@ import javax.persistence.Id;
 public class MovieEntity {
 
     @Id
+    @Column(length = 128)
     private String id;
 
     private String name;
