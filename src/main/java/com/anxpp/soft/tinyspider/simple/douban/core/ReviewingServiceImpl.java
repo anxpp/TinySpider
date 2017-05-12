@@ -73,7 +73,7 @@ public class ReviewingServiceImpl implements ReviewingService {
      */
     @Override
     public Map<String, Object> forComments(String id, String code, String robot) throws Exception {
-        log.info("ReviewingServiceImpl::forComments -> begin:" + id);
+        log.info("ReviewingServiceImpl::forComments -> begin:" + id + ", count Task now:" + countTask.intValue());
         Map<String, Object> map = new HashMap<>(3);
 
         //是否需要机器人验证
