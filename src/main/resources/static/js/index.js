@@ -24,9 +24,9 @@ $(function () {
         $('div.header').addClass('intro-header');
         $('#div_header_main').show();
     }
-    initCsdnweekly();
+    // initCsdnweekly();
     getMcnbetaArticles();
-    getMovies();
+    // getMovies();
     //TAB点击事件
     $('#ul_tab_menu li').click(function () {
         if ($(this).hasClass('active'))
