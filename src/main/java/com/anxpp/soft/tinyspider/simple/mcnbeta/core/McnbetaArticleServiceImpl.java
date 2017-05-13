@@ -29,8 +29,8 @@ public class McnbetaArticleServiceImpl implements McnbetaArticleService {
     @Override
     @Cacheable(value = "mcnbeta", keyGenerator = "keyGenerator")
     public String forPage(Integer page) throws Exception {
-        Map<String,Integer> params = new HashMap<>(3);
-        params.put("page",page);
-        return restTemplate.getForObject("http://m.cnbeta.com/touch/default/timeline.json",String.class,params);
+        Map<String, Integer> params = new HashMap<>(3);
+        params.put("page", page);
+        return restTemplate.getForObject("http://m.cnbeta.com/touch/default/timeline.json", String.class, params);
     }
 }

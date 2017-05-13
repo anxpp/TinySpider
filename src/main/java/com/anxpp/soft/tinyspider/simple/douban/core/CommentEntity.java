@@ -9,7 +9,7 @@ import javax.persistence.Entity;
  * Created by anxpp.com on 2017/5/8.
  */
 @Entity
-public class CommentEntity  extends BaseEntity {
+public class CommentEntity extends BaseEntity {
 
     //作者
     private String movieId;

@@ -2,6 +2,9 @@ package com.anxpp.soft.tinyspider.simple.douban.core;
 
 import com.anxpp.soft.tinyspider.Utils.TinySpider;
 import com.anxpp.soft.tinyspider.Utils.analyzer.DocumentAnalyzer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -9,18 +12,17 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.Serializable;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,8 +33,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class ReviewingServiceImpl implements ReviewingService {
 
-    //
-    private ConcurrentHashMap<String, ProcessingInfo> info = new ConcurrentHashMap<>();
+    //用于集群
+    @Resource
+    private RedisTemplate redisTemplate;
 
     //当前任务数
     private AtomicInteger countTask = new AtomicInteger();
@@ -43,7 +46,17 @@ public class ReviewingServiceImpl implements ReviewingService {
     //当前网页的cookies
     private volatile Map<String, String> cookiesOfDouban = new HashMap<>();
 
-    private static final int MIN_INTERVAL = 1993;
+    //最小间隔
+    private static final int MIN_INTERVAL = 999;
+
+    //最大抓取数
+    private static final int MAX_COUNT = 999999;
+
+    //最大线程数
+    private static final int MAX_THREAD = 64;
+
+    //key前缀
+    private static final String REDIS_KEY_PRE_MOVIE = "douban_movie_ongoing";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -72,9 +85,35 @@ public class ReviewingServiceImpl implements ReviewingService {
      * @return 文章列表
      */
     @Override
-    public Map<String, Object> forComments(String id, String code, String robot) throws Exception {
+    public Map<String, Object> forComments(String id, String code, String robot, String command) throws Exception {
+
+        //初始化列表信息
+        final HashMap<String, ProcessingInfo> infoInRedis = getInfoFromRedis();
+
         log.info("ReviewingServiceImpl::forComments -> begin:" + id + ", count Task now:" + countTask.intValue());
         Map<String, Object> map = new HashMap<>(3);
+
+        //判断动作
+        if (StringUtils.hasText(command)) {
+            //继续数据库中的任务
+            if ("continue".equals(command)) {
+                //获取数据库中进行中的任务
+                List<MovieEntity> ongoingMovies = movieRepo.findByState(1);
+                ArrayList<String> realContinues = new ArrayList<>(ongoingMovies.size());
+                ongoingMovies.forEach(movieEntity -> {
+                    if (!infoInRedis.containsKey(movieEntity.getId()) && realContinues.size() < MAX_THREAD) {
+                        continueTask(movieEntity, infoInRedis);
+                        realContinues.add(movieEntity.getId());
+                    }
+                });
+                //更新Redis信息
+                if (realContinues.size() > 0)
+                    updateInfoInRedis(infoInRedis);
+                map.put("state", 1);
+                map.put("total", "restart count：" + realContinues.size());
+                return map;
+            }
+        }
 
         //是否需要机器人验证
         if (StringUtils.hasText(robot)) {
@@ -108,59 +147,162 @@ public class ReviewingServiceImpl implements ReviewingService {
             }
         }
 
-        //判断进度等信息
-        ProcessingInfo processingInfo = info.get(id);
-        if (processingInfo != null) {
-            log.info("ReviewingServiceImpl::forComments -> processing");
-            if (processingInfo.isFinish()) {
-                map.put("state", 2);
-                info.remove(id);
-                updateMovieState(id, 2);
-            } else {
-                //返回进度
-                map.put("state", 1);
-                map.put("total", processingInfo.getCount());
-                map.put("current", processingInfo.getCurrentIndex());
-                updateMovieState(id, 1);
-            }
-            return map;
-        } else {
-            //check movie from database
-            MovieEntity movieEntity = movieRepo.findOne(id);
-            if (movieEntity != null) {
-                log.info("already stared， now continue ...");
-                //already complete
-                if (movieEntity.getState() == 2) {
+        if (id != null) {
+            //判断进度等信息
+            ProcessingInfo processingInfo = infoInRedis.get(id);
+            if (processingInfo != null) {
+                log.info("ReviewingServiceImpl::forComments -> processing");
+                if (processingInfo.isFinish() || processingInfo.isComplete()) {
                     map.put("state", 2);
-                    return map;
+                    infoInRedis.remove(id);
+                    updateInfoInRedis(infoInRedis);
+                    updateMovieState(id, 2);
                 } else {
-                    //添加任务
-                    log.info("ReviewingServiceImpl::forComments -> begin task");
-                    processingInfo = new ProcessingInfo();
-                    processingInfo.setCurrentIndex(movieEntity.getCurrent());
-                    processingInfo.setCount(movieEntity.getCountReviewing());
-                    info.put(id, processingInfo);
-                    new SpiderTask().start(id);
+                    //返回进度
                     map.put("state", 1);
                     map.put("total", processingInfo.getCount());
                     map.put("current", processingInfo.getCurrentIndex());
                     updateMovieState(id, 1);
+                }
+                return map;
+            } else {
+                //check movie from database
+                MovieEntity movieEntity = movieRepo.findOne(id);
+                if (movieEntity != null && movieEntity.getState() != 0) {
+                    log.info("already stared， now continue ...");
+                    //already complete
+                    if (movieEntity.getState() == 2) {
+                        map.put("state", 2);
+                        return map;
+                    } else {
+                        //添加任务
+                        continueTask(movieEntity, infoInRedis);
+                        updateInfoInRedis(infoInRedis);
+                        processingInfo = infoInRedis.get(id);
+                        map.put("state", 1);
+                        map.put("total", processingInfo.getCount());
+                        map.put("current", processingInfo.getCurrentIndex());
+                        return map;
+                    }
+                } else {
+                    log.info("ReviewingServiceImpl::forComments -> begin task");
+                    //添加任务
+                    processingInfo = new ProcessingInfo();
+                    processingInfo.setCurrentIndex(0);
+                    processingInfo.setCount(100);
+                    infoInRedis.put(id, processingInfo);
+                    updateInfoInRedis(infoInRedis);
+                    //开始抓取任务
+                    new SpiderTask().start(id);
+                    map.put("state", 0);
+                    updateMovieState(id, 1);
                     return map;
                 }
-            } else {
-                log.info("ReviewingServiceImpl::forComments -> begin task");
-                //添加任务
-                processingInfo = new ProcessingInfo();
-                processingInfo.setCurrentIndex(0);
-                processingInfo.setCount(100);
-                info.put(id, processingInfo);
-                //开始抓取任务
-                new SpiderTask().start(id);
-                map.put("state", 0);
-                updateMovieState(id, 1);
-                return map;
             }
         }
+        map.put("state", -1);
+        return map;
+    }
+
+    //从redis获取信息
+    private HashMap<String, ProcessingInfo> getInfoFromRedis() {
+        //初始化列表信息
+        ObjectMapper mapper = new ObjectMapper();
+        Object object = redisTemplate.opsForValue().get(REDIS_KEY_PRE_MOVIE);
+        String json = "";
+        if (object != null)
+            json = object.toString();
+        final HashMap<String, ProcessingInfo> infoInRedis = new HashMap<>();
+        if (StringUtils.hasText(json)) {
+            HashMap<String, ProcessingInfo> result = null;
+            try {
+                result = mapper.readValue(json, mapper.getTypeFactory().constructParametricType(HashMap.class, String.class, ProcessingInfo.class));
+            } catch (IOException e) {
+                log.info("getInfoFromRedis::IOException");
+                e.printStackTrace();
+            }
+            if (result != null)
+                result.forEach(infoInRedis::put);
+        }
+        return infoInRedis;
+    }
+
+    //更新Redis信息
+    private void updateInfoInRedis(HashMap<String, ProcessingInfo> infoInRedis) {
+        if (infoInRedis != null && infoInRedis.size() > 0)
+            try {
+                redisTemplate.opsForValue().set(REDIS_KEY_PRE_MOVIE, new ObjectMapper().writeValueAsString(infoInRedis), 365, TimeUnit.DAYS);
+            } catch (JsonProcessingException e) {
+                log.info("updateInfoInRedis::JsonProcessingException");
+                e.printStackTrace();
+            }
+    }
+
+    public static class ErrorInfo {
+        String movie;
+        Integer current;
+
+        public ErrorInfo() {
+        }
+
+        ErrorInfo(String movie, Integer current) {
+            this.movie = movie;
+            this.current = current;
+        }
+
+        public String getMovie() {
+            return movie;
+        }
+
+        public void setMovie(String movie) {
+            this.movie = movie;
+        }
+
+        public Integer getCurrent() {
+            return current;
+        }
+
+        public void setCurrent(Integer current) {
+            this.current = current;
+        }
+    }
+
+    private void recordFailed(String id, Integer current) {
+        String key = REDIS_KEY_PRE_MOVIE + "failed list";
+        ObjectMapper mapper = new ObjectMapper();
+        Object object = redisTemplate.opsForValue().get(key);
+        String json = "";
+        if (object != null)
+            json = object.toString();
+        List<ErrorInfo> result = null;
+        if (StringUtils.hasText(json))
+            try {
+                result = mapper.readValue(json, mapper.getTypeFactory().constructParametricType(List.class, ErrorInfo.class));
+            } catch (IOException e) {
+                log.info("recordFailed::IOException");
+                result = null;
+                e.printStackTrace();
+            }
+        if (result != null) {
+            result.add(new ErrorInfo(id, current));
+            try {
+                redisTemplate.opsForValue().set(key, new ObjectMapper().writeValueAsString(result), 365, TimeUnit.DAYS);
+            } catch (JsonProcessingException e) {
+                log.info("recordFailed::JsonProcessingException");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void continueTask(MovieEntity movieEntity, HashMap<String, ProcessingInfo> info) {
+        String id = movieEntity.getId();
+        //添加任务
+        log.info("ReviewingServiceImpl::forComments -> begin task");
+        ProcessingInfo processingInfo = new ProcessingInfo();
+        processingInfo.setCurrentIndex(movieEntity.getCurrent());
+        processingInfo.setCount(movieEntity.getCountReviewing());
+        info.put(id, processingInfo);
+        new SpiderTask().start(id);
     }
 
     /**
@@ -186,8 +328,25 @@ public class ReviewingServiceImpl implements ReviewingService {
      */
     @Override
     public void setCount(String id, int count) {
-        info.get(id).setCount(count);
+        final HashMap<String, ProcessingInfo> infoInRedis = getInfoFromRedis();
+        infoInRedis.get(id).setCount(count);
+        updateInfoInRedis(infoInRedis);
         updateMovieCount(id, count);
+    }
+
+    /**
+     * 完成影评抓取
+     *
+     * @param id 文章id
+     */
+    @Override
+    public void finish(String id) {
+        //任务中移除
+        final HashMap<String, ProcessingInfo> infoInRedis = getInfoFromRedis();
+        infoInRedis.get(id).setComplete();
+        updateInfoInRedis(infoInRedis);
+        //更新数据库状态
+        updateMovieState(id, 2);
     }
 
     /**
@@ -213,8 +372,6 @@ public class ReviewingServiceImpl implements ReviewingService {
                 //首先登陆获取cookies
                 if (cookiesOfDouban.isEmpty())
                     doLogin();
-                //开始任务
-                ProcessingInfo processingInfo = info.get(id);
                 Random random = new Random();
                 while (true) {
                     int i = random.nextInt(30000) + 10000;
@@ -229,7 +386,11 @@ public class ReviewingServiceImpl implements ReviewingService {
                         continue;
                     lastTime.set(now);
 
+                    //开始任务
+                    HashMap<String, ProcessingInfo> infoInRedis = getInfoFromRedis();
+                    ProcessingInfo processingInfo = infoInRedis.get(id);
                     int current = processingInfo.getAndIncreaseCurrentIndex();
+                    updateInfoInRedis(infoInRedis);
                     try {
                         List<CommentEntity> result = TinySpider.forEntityList(preUrlOfComment + id + "/comments?start=" + current, commentDocumentAnalyzer, CommentEntity.class, id, cookiesOfDouban);
                         //保存评论
@@ -237,8 +398,9 @@ public class ReviewingServiceImpl implements ReviewingService {
                         //更新影评抓取进度
                         updateMovieCurrent(id, current);
                     } catch (Exception e) {
-                        log.info("SpiderTask::start");
-                        processingInfo.setCurrentIndex(Math.max(0, current - ProcessingInfo.PAGE_SIZE));
+                        log.info("SpiderTask::Exception");
+                        //记录失败的
+                        recordFailed(id, current);
                         e.printStackTrace();
 //                        doLogin();
                         try {
@@ -248,12 +410,21 @@ public class ReviewingServiceImpl implements ReviewingService {
                         }
                     }
                     if (processingInfo.isFinish()) {
-                        log.info("complete:" + id);
+                        log.info("finish:" + id);
                         updateMovieState(id, 2);
                         break;
                     }
+                    if (processingInfo.isComplete()) {
+                        log.info("complete:" + id);
+                        break;
+                    }
                 }
+                //任务数减一
                 countTask.set(countTask.intValue() - 1);
+                //删除
+                HashMap<String, ProcessingInfo> infoInRedis = getInfoFromRedis();
+                infoInRedis.remove(id);
+                updateInfoInRedis(infoInRedis);
                 log.info("SpiderTask::start -> end task");
             });
         }
@@ -273,8 +444,10 @@ public class ReviewingServiceImpl implements ReviewingService {
 
     private void updateMovieState(String id, int state) {
         MovieEntity movieEntity = movieRepo.findOne(id);
-        movieEntity.setState(state);
-        movieRepo.save(movieEntity);
+        if (movieEntity != null) {
+            movieEntity.setState(state);
+            movieRepo.save(movieEntity);
+        }
     }
 
     //登录
@@ -311,10 +484,17 @@ public class ReviewingServiceImpl implements ReviewingService {
     //获取登陆验证码
     private String[] getCheckImg() {
         log.info("ReviewingServiceImpl::getCheckImg get the check image");
-        String[] result = new String[2];
+        String[] result = new String[3];
         //captcha_image
         try {
             Element body = Jsoup.connect("https://accounts.douban.com/login").get().body();
+            //判断是否需要验证码登陆
+            Element img = body.getElementById("captcha_image");
+            if (img != null) {//captcha-id
+                result[0] = "login";
+                result[1] = img.attr("src");
+                return result;
+            }
             //首先判断是否需要验证机器人
             Elements imgRobots = body.getElementsByAttributeValue("alt", "captcha");
             if (imgRobots.size() > 0 && imgRobots.get(0) != null) {
@@ -322,11 +502,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                 result[0] = "robot";
                 result[1] = imgRobot.attr("src");
                 result[2] = body.getElementsByAttributeValue("name", "captcha-id").get(0).val();
-            }
-            Element img = body.getElementById("captcha_image");
-            if (img != null) {//captcha-id
-                result[0] = "login";
-                result[1] = img.attr("src");
+                return result;
             }
         } catch (IOException e) {
             log.info("ReviewingServiceImpl::getCheckImg IOException");
@@ -354,8 +530,8 @@ public class ReviewingServiceImpl implements ReviewingService {
         Map<String, String> header = new HashMap<>();
         header.put("source", "movie");
         header.put("redir", "https://movie.douban.com/");
-        header.put("form_email", "15215229221");
-        header.put("form_password", "123698745");
+        header.put("form_email", "17602109221");
+        header.put("form_password", "anxpp0618");
         if (StringUtils.hasText(code))
             header.put("captcha-solution", code);
         header.put("login", "登录");
@@ -365,37 +541,56 @@ public class ReviewingServiceImpl implements ReviewingService {
     /**
      * 数据抓取的进度信息
      */
-    private static class ProcessingInfo {
+    public static class ProcessingInfo implements Serializable {
         final static int PAGE_SIZE = 20;
         //总评论数
         volatile int count;
         //当前抓取的位置
         volatile int currentIndex;
+        //是否完成
+        volatile boolean complete;
 
-        boolean isFinish() {
-            return currentIndex >= count || currentIndex > 11000;
+        public ProcessingInfo() {
         }
 
-        int getCount() {
+        @JsonIgnore
+        public boolean isFinish() {
+            return currentIndex >= count || currentIndex > MAX_COUNT;
+        }
+
+        public int getCount() {
             return count;
         }
 
-        void setCount(int count) {
+        public void setCount(int count) {
             this.count = count;
         }
 
-        void setCurrentIndex(int currentIndex) {
+        public void setCurrentIndex(int currentIndex) {
             this.currentIndex = currentIndex;
         }
 
-        int getAndIncreaseCurrentIndex() {
+        @JsonIgnore
+        public int getAndIncreaseCurrentIndex() {
             int current = currentIndex;
             currentIndex += PAGE_SIZE;
             return current;
         }
 
-        int getCurrentIndex() {
+        public boolean isComplete() {
+            return complete;
+        }
+
+        public void setComplete() {
+            this.complete = true;
+        }
+
+        public int getCurrentIndex() {
             return currentIndex;
+        }
+
+        public void setComplete(boolean complete) {
+            this.complete = complete;
         }
     }
 }

@@ -190,8 +190,8 @@ function getMovieComments(id) {
     var code = $('#check_img_value').val();
     if (code.length > 0 && type == 8)
         params['code'] = code;
-    if (code.length > 0 && type == 88){
-        params['robot'] = code+','+key;
+    if (code.length > 0 && type == 88) {
+        params['robot'] = code + ',' + key;
     }
     $('#check_img_value').val('');
     $.get('/douban/movie/comments/' + id, params, function (result) {

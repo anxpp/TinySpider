@@ -15,7 +15,7 @@ public class ArticleVO {
     private String url;
     private List<Tag> tags;
 
-    public ArticleVO(){
+    public ArticleVO() {
 
     }
 

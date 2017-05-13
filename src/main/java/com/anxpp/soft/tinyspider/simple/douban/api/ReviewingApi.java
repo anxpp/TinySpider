@@ -43,8 +43,8 @@ public class ReviewingApi {
      */
     @ResponseBody
     @GetMapping("/comments/{movie}")
-    public Map<String, Object> reviewing(@PathVariable("movie") String movie, String code, String robot) throws Exception {
+    public Map<String, Object> reviewing(@PathVariable("movie") String movie, String code, String robot, String command) throws Exception {
         log.info("reviewing：" + movie);
-        return reviewingService.forComments(movie, code, robot);
+        return reviewingService.forComments(movie, code, robot, command);
     }
 }

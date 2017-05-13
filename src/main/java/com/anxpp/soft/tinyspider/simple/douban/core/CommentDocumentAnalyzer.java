@@ -47,6 +47,9 @@ public class CommentDocumentAnalyzer implements DocumentAnalyzer {
         List<Map<String, Object>> results = new ArrayList<>();
         if (ObjectUtils.isEmpty(document))
             return results;
+        //是否已完成
+        if (document.body().getElementById("comments").getElementsByClass("comment-item").get(0).text().contains("还没有人写过短评"))
+            reviewingService.finish(id.toString());
         int count = Integer.valueOf(document.body().getElementsByClass("CommentTabs").get(0).getElementsByTag("span").get(0).text().replaceAll("\\D+", ""));
         reviewingService.setCount(id.toString(), count);
         document.body().getElementById("comments").getElementsByClass("comment-item").forEach(ele -> {

@@ -31,7 +31,11 @@ public class TinySpider {
         //设置请求头
         if (cookies != null && cookies.size() > 0)
             connection.cookies(cookies);
-        docAnalyzer.forListMap(connection.get(), info).forEach(map -> {
+        Connection.Response response = connection.execute();
+        //更新cookies
+//        if (cookies != null && cookies.size() > 0)
+//            mergeMap(response.cookies(), cookies);
+        docAnalyzer.forListMap(response.parse(), info).forEach(map -> {
             try {
                 results.add(TinyUtil.mapToBean(map, type));
             } catch (Exception e) {
@@ -39,5 +43,11 @@ public class TinySpider {
             }
         });
         return results;
+    }
+
+    private static Map<String, String> mergeMap(Map<String, String> base, Map<String, String> more) {
+        more.forEach(base::put);
+        more = base;
+        return more;
     }
 }

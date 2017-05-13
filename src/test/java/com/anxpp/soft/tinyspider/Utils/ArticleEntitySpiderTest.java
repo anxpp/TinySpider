@@ -48,7 +48,7 @@ public class ArticleEntitySpiderTest {
         assert document != null;
         Element body = document.body();
         Elements elements = body.getElementsByClass("pclist").get(0).children();
-        elements.forEach(ele-> log.info(ele.getElementsByTag("span").get(0).getElementsByTag("a").get(0).getElementsByTag("img").get(0).attr("src")));
+        elements.forEach(ele -> log.info(ele.getElementsByTag("span").get(0).getElementsByTag("a").get(0).getElementsByTag("img").get(0).attr("src")));
 
         log.info(elements.text());
 

@@ -14,7 +14,7 @@ public interface ReviewingService {
      * @param id 期号
      * @return 文章列表
      */
-    Map<String, Object> forComments(String id, String code, String robot) throws Exception;
+    Map<String, Object> forComments(String id, String code, String robot, String command) throws Exception;
 
     /**
      * 查找影评
@@ -30,4 +30,11 @@ public interface ReviewingService {
      * @param count count
      */
     void setCount(String id, int count);
+
+    /**
+     * 完成影评抓取
+     *
+     * @param id 文章id
+     */
+    void finish(String id);
 }

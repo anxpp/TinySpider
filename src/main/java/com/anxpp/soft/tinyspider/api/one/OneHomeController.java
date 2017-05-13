@@ -29,7 +29,7 @@ public class OneHomeController {
     @ResponseBody
     @GetMapping("/get/article/{page}")
     public List<ArticleVO> getArticleByStage(@PathVariable("page") Integer page) throws Exception {
-        log.info("获取One首页内容："+page);
+        log.info("获取One首页内容：" + page);
         return oneHomeService.page(page);
     }
 }

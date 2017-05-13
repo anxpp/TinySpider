@@ -45,7 +45,7 @@ public class OneHomeServiceImpl implements OneHomeService {
             articleVO.setUrl(articleEntity.getUrl());
             //文章tag
             List<Tag> tags = new ArrayList<>(2);
-            tags.add(new Tag("第"+articleEntity.getStage()+"期", getIntFromColor(0xf4,0xa2,0x61)));//f4a261
+            tags.add(new Tag("第" + articleEntity.getStage() + "期", getIntFromColor(0xf4, 0xa2, 0x61)));//f4a261
             tags.add(new Tag("csdn干货", getIntFromColor(0xc4, 0x67, 0xf4)));
             articleVO.setTags(tags);
             articleVOList.add(articleVO);

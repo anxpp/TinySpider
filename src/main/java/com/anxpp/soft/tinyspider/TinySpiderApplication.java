@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class TinySpiderApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(TinySpiderApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(TinySpiderApplication.class, args);
+    }
 }
