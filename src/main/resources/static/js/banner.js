@@ -1,6 +1,6 @@
 /**
  * banner
- * Created by anxpp.com on 2017/3/25.
+ * Created by Neven on 2017/3/25.
  */
 (function (main) {
     var args = {};

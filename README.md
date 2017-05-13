@@ -9,9 +9,9 @@ spring boot + jsoup + redis 抓取CSDN每周干货知识
 3、数据库已配置好，也可以将数据持久化到数据库
 
 示例界面：
-![](http://qiniu.anxpp.com//anxpp/com/tinysoft/csdn/weekly/2AO_0~Z%29R%7BP%7B%5DL4B%7B@P%28V%29F.png) 
+![](http://qiniu.Neven//anxpp/com/tinysoft/csdn/weekly/2AO_0~Z%29R%7BP%7B%5DL4B%7B@P%28V%29F.png) 
 
-可以访问 [http://anxpp.com:8765/articleVO/get/stage/1][1] 测试：
+可以访问 [http://Neven:8765/articleVO/get/stage/1][1] 测试：
 
     [
         {
@@ -139,4 +139,4 @@ spring boot + jsoup + redis 抓取CSDN每周干货知识
 ！注意：使用时请自行更改application.properties中的redis配置
 
 
-  [1]: http://anxpp.com:8765/articleVO/get/stage/1
+  [1]: http://Neven:8765/articleVO/get/stage/1

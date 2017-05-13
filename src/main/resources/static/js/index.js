@@ -1,6 +1,6 @@
 /**
  * index
- * Created by anxpp.com on 2017/3/25.
+ * Created by Neven on 2017/3/25.
  */
 var mcnbetaPage = 1;
 /**
