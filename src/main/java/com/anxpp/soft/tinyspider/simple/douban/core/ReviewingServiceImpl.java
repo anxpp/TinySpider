@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class ReviewingServiceImpl implements ReviewingService {
 
+    private static final String username = "17602109221";
+    private static final String password = "anxpp0618";
+
     //用于集群
     @Resource
     private RedisTemplate redisTemplate;
@@ -47,13 +50,13 @@ public class ReviewingServiceImpl implements ReviewingService {
     private volatile Map<String, String> cookiesOfDouban = new HashMap<>();
 
     //最小间隔
-    private static final int MIN_INTERVAL = 999;
+    private static final int MIN_INTERVAL = 1999;
 
     //最大抓取数
     private static final int MAX_COUNT = 999999;
 
     //最大线程数
-    private static final int MAX_THREAD = 64;
+    private static final int MAX_THREAD = 16;
 
     //key前缀
     private static final String REDIS_KEY_PRE_MOVIE = "douban_movie_ongoing";
@@ -111,6 +114,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                     updateInfoInRedis(infoInRedis);
                 map.put("state", 1);
                 map.put("total", "restart count：" + realContinues.size());
+                log.info("continue with db info: " + realContinues.size());
                 return map;
             }
         }
@@ -530,8 +534,10 @@ public class ReviewingServiceImpl implements ReviewingService {
         Map<String, String> header = new HashMap<>();
         header.put("source", "movie");
         header.put("redir", "https://movie.douban.com/");
-        header.put("form_email", "17602109221");
-        header.put("form_password", "anxpp0618");
+//        header.put("form_email", "17602109221");
+//        header.put("form_password", "anxpp0618");
+        header.put("form_email", username);
+        header.put("form_password", password);
         if (StringUtils.hasText(code))
             header.put("captcha-solution", code);
         header.put("login", "登录");
