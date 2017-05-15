@@ -33,8 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class ReviewingServiceImpl implements ReviewingService {
 
-    private static final String username = "17602109221";
-    private static final String password = "anxpp0618";
+    private static final String username = "18101795616";
+    private static final String password = "061651wc";
 
     //用于集群
     @Resource
@@ -106,6 +106,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                 ongoingMovies.forEach(movieEntity -> {
                     if (!infoInRedis.containsKey(movieEntity.getId()) && realContinues.size() < MAX_THREAD) {
                         continueTask(movieEntity, infoInRedis);
+                        log.info("current movie:" + movieEntity.getId() + "  " + movieEntity.getName());
                         realContinues.add(movieEntity.getId());
                     }
                 });
@@ -235,7 +236,7 @@ public class ReviewingServiceImpl implements ReviewingService {
     private void updateInfoInRedis(HashMap<String, ProcessingInfo> infoInRedis) {
         if (infoInRedis != null && infoInRedis.size() > 0)
             try {
-                redisTemplate.opsForValue().set(REDIS_KEY_PRE_MOVIE, new ObjectMapper().writeValueAsString(infoInRedis), 365, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(REDIS_KEY_PRE_MOVIE, new ObjectMapper().writeValueAsString(infoInRedis), 1, TimeUnit.HOURS);
             } catch (JsonProcessingException e) {
                 log.info("updateInfoInRedis::JsonProcessingException");
                 e.printStackTrace();
