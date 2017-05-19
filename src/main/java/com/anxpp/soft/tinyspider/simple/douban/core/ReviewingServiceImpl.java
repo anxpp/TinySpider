@@ -33,8 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class ReviewingServiceImpl implements ReviewingService {
 
-    private static final String username = "17602109221";
-    private static final String password = "anxpp0618";
+    private static final String username = "15215229221";
+    private static final String password = "123698745";
 
     //用于集群
     @Resource
@@ -50,7 +50,7 @@ public class ReviewingServiceImpl implements ReviewingService {
     private volatile Map<String, String> cookiesOfDouban = new HashMap<>();
 
     //最小间隔
-    private static final int MIN_INTERVAL = 1999;
+    private static final int MIN_INTERVAL = 999;
 
     //最大抓取数
     private static final int MAX_COUNT = 999999;
@@ -89,6 +89,8 @@ public class ReviewingServiceImpl implements ReviewingService {
      */
     @Override
     public Map<String, Object> forComments(String id, String code, String robot, String command) throws Exception {
+
+        log.info("forComments: id="+id+"  code="+code+"  robot="+robot+"  command="+command);
 
         //初始化列表信息
         final HashMap<String, ProcessingInfo> infoInRedis = getInfoFromRedis();
@@ -161,12 +163,15 @@ public class ReviewingServiceImpl implements ReviewingService {
                     infoInRedis.remove(id);
                     updateInfoInRedis(infoInRedis);
                     updateMovieState(id, 2);
+                    log.info("ReviewingServiceImpl::forComments -> finish");
                 } else {
                     //返回进度
                     map.put("state", 1);
                     map.put("total", processingInfo.getCount());
                     map.put("current", processingInfo.getCurrentIndex());
                     updateMovieState(id, 1);
+                    MovieEntity movieEntity = movieRepo.findOne(id);
+                    continueTask(movieEntity, infoInRedis);
                 }
                 return map;
             } else {
@@ -378,7 +383,7 @@ public class ReviewingServiceImpl implements ReviewingService {
                     doLogin();
                 Random random = new Random();
                 while (true) {
-                    int i = random.nextInt(30000) + 10000;
+                    int i = random.nextInt(30000) + 5000;
                     try {
                         Thread.currentThread().sleep(i);
                     } catch (InterruptedException e1) {
